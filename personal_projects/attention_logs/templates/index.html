@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Session Log</title>
+  <style>
+    :root{
+      --bg:#0b0c0f; --card:#11131a; --muted:#9aa3b2; --text:#e6eaf2; --accent:#6ea8fe; --accent-press:#4e8df1;
+      --ring:0 0 0 3px rgba(110,168,254,.35);
+    }
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f6f7fb; --card:#ffffff; --muted:#667085; --text:#0b1220; --accent:#2563eb; --accent-press:#1d4ed8; }
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
+      background:var(--bg); color:var(--text); display:flex; justify-content:center;
+    }
+    .wrap{ width:100%; max-width:780px; padding:24px 16px 96px; }
+    .card{
+      background:var(--card); border:1px solid rgba(148,163,184,.15); border-radius:16px; padding:20px; box-shadow:0 10px 20px rgba(2,6,23,.15);
+    }
+    h1{ font-size: clamp(20px, 4vw, 28px); margin:0 0 12px; }
+    .subtitle{ color:var(--muted); margin:0 0 16px; font-size:14px; }
+    form{ display:grid; gap:12px; }
+    label{ font-size:14px; color:var(--muted); }
+    .row{ display:grid; gap:12px; grid-template-columns:1fr; }
+    @media(min-width:560px){ .row{ grid-template-columns:1fr 1fr; } }
+    input[type="text"]{
+      width:100%; padding:14px 14px; border-radius:12px; border:1px solid rgba(148,163,184,.25); background:transparent; color:var(--text);
+      font-size:16px; outline:none;
+    }
+    input[type="text"]:focus{ border-color:var(--accent); box-shadow:var(--ring); }
+    .actions{ display:flex; gap:12px; align-items:center; }
+    .btn{
+      appearance:none; border:0; border-radius:12px; padding:12px 16px; font-weight:600; cursor:pointer;
+      background:var(--accent); color:white; font-size:16px;
+    }
+    .btn:active{ transform: translateY(1px); background:var(--accent-press); }
+    .list{
+      margin-top:18px; padding:0; list-style:none; border-top:1px dashed rgba(148,163,184,.25);
+      max-height:50vh; overflow:auto;
+    }
+    .item{
+      display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px dashed rgba(148,163,184,.18);
+    }
+    .time{ font-variant-numeric: tabular-nums; color:var(--muted); min-width:84px; }
+    .empty{ color:var(--muted); padding:14px 0; }
+
+    /* Toast */
+    .toast{
+      position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px);
+      background: rgba(17,19,26,.92); color:#e6eaf2; border:1px solid rgba(148,163,184,.25);
+      padding:12px 16px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+      opacity:0; pointer-events:none; transition: transform .25s ease, opacity .25s ease;
+      max-width: 90vw;
+    }
+    @media (prefers-color-scheme: light){
+      .toast{ background: rgba(255,255,255,.95); color:#0b1220; }
+    }
+    .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <h1>Formular</h1>
+      <p class="subtitle">Bitte Name und Nachname eingeben.</p>
+
+      <form method="POST" action="" autocomplete="off" id="entry-form">
+        <div class="row">
+          <div>
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" placeholder="z. B. Anna" required autofocus />
+          </div>
+          <div>
+            <label for="fname">Nachname</label>
+            <input id="fname" name="fname" type="text" placeholder="z. B. Müller" required />
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="submit">Schicken</button>
+        </div>
+      </form>
+
+      <ul class="list">
+        {% if all_data %}
+          {% for item in all_data|reverse %}
+            <li class="item">
+              <span class="time">{{ item['time'] }}</span>
+              <span>{{ item['name'] }} {{ item['fname'] }}</span>
+            </li>
+          {% endfor %}
+        {% else %}
+          <li class="empty">Noch keine Einträge</li>
+        {% endif %}
+      </ul>
+    </section>
+  </main>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite">Danke!</div>
+
+  <script>
+    // 1) На отправку формы ставим флажок, чтобы после редиректа показать уведомление
+    document.getElementById('entry-form').addEventListener('submit', function(){
+      try { sessionStorage.setItem('justAdded', '1'); } catch(e){}
+    });
+
+    // 2) Функция показа тоста
+    function showToast(message, timeout=2200){
+      const el = document.getElementById('toast');
+      el.textContent = message || 'Danke!';
+      el.classList.add('show');
+      setTimeout(()=> el.classList.remove('show'), timeout);
+    }
+
+    // 3) Пытаемся показать нативное уведомление (если разрешено), плюс тост
+    function notify(message){
+      showToast(message);
+      if ('Notification' in window){
+        if (Notification.permission === 'granted'){
+          try { new Notification('Готово', { body: message }); } catch(e){}
+        }
+      }
+    }
+
+    // 4) Просим разрешение на нативные уведомления один раз
+    (function askPermissionOnce(){
+      if ('Notification' in window){
+        if (Notification.permission === 'default'){
+          // не блокируем UX, попросим спустя секунду лёгкой работы
+          setTimeout(() => { try { Notification.requestPermission(); } catch(e){} }, 1000);
+        }
+      }
+    })();
+
+    // 5) После загрузки страницы проверяем флажок и показываем уведомление
+    window.addEventListener('DOMContentLoaded', function(){
+      let added = null;
+      try { added = sessionStorage.getItem('justAdded'); } catch(e){}
+      if (added === '1'){
+        notify('Danke!');
+        try { sessionStorage.removeItem('justAdded'); } catch(e){}
+      }
+    });
+  </script>
+</body>
+</html>
