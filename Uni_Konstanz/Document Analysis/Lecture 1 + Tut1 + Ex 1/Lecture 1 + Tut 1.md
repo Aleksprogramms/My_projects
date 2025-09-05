@@ -109,6 +109,98 @@ Morphology:
 Morpheme:
 - The smallest meaningful unit in the grammar of a language
 
+- 
+
 Contrasts in morphology:
 - Derivational morphology vs. inflectional morphology
 - Concatenative morphology vs. templatic morphology (root-and-pattern)
+
+### Examples of Morphemes
+
+unladylike
+- 3 morphemes, 4 syllables
+  - un-: meaning "not"
+  - lady: meaning "(well behaved) demale adult human"
+  - -like: meaning "Having the characteristics of"
+- We cannot further break these down without distorting the meaning of the units
+
+technique
+- 1 morpheme, 2 syllables
+
+dogs
+- 2 morphemes, 1 syllable
+  - dog: meaning "a domesticated animal"
+  - -s: a plural marker for nouns
+ 
+## Inflectional vs. Derivational Morphology
+
+Typical word classes:
+- Parts of speech: noun, verb, adjectives, etc.
+
+Inflection:
+- Variation in the form of a word, typically by means of an affix, that expresses a grammatical contrast.
+- Does not change the word class
+- Usually produces a predictable, non-idiosyncratic change of meaning.
+- Example: run -> runs | running
+
+Derivation:
+- The formation of a new word or inflectable stem from another word or stem.
+- Example: compute -> computer -> computerization
+
+ ### Inflectional Morphology
+
+ Typically, inflectional morphology
+ - Does not change the word class
+ - Modifies words to serve a new grammatical role
+ - Adds morphemes that encode
+   - tense, number, person, mood, aspect, etc.
+ - English example:
+   - The pizza guy arrives at noon.
+   - arrive is inflected for person (3rd person) and number (singular)
+### Derivational Morphology
+Nominalization: formation of nouns from other parts of speecj (in English: primarily verbs)
+- compute -> computerization
+- appoint -> appointee
+- kill -> killer
+- fuzzy -> fuzziness
+Formation of adjectives (primarily from nouns)
+- computer -> computational
+- clue -> clueless
+- Embrace -> embraceable
+
+This process is not always entirely regular by simply adding morphemes
+(computer -> computational)
+
+### Morphemes: terminology
+
+Root: The component of the word that
+- is common to a set of derived or inflected forms, if any, when all affixes are removed
+- cannot be split further into meaningful components
+- carries the principal porion of meaining of the words
+- For example: studying / studies -> stud
+
+Lemma: 
+- The base form of a word
+- For example: studying / studies -> (to) study
+
+Stem: 
+- The common part to all inflected words.
+- Is not always a proper words from the dictionary
+- For example: studying / studies -> studi
+
+Affix (prefix, infix, suffix):
+
+- A bound morpheme that is joined before, afterm or within a root or stem.
+- English example:
+  - This is unbelievable! (The prefix un- modifies the word believable)
+
+Clitic:
+
+- A morpheme that functions syntactically like a word, but does not appear as an independent phonological word
+- English example:
+- Hal's shop (genetive marker 's)
+- What's going on? (shortened form of is)
+
+# Text Segmentation
+
+// TODO
