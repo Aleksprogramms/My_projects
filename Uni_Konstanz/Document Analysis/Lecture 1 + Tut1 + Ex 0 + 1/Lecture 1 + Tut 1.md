@@ -289,6 +289,6 @@ Core idea
 
 V - sequence of vowels
 C - sequence of consonants
-[C](VC)^m[V] is a measure of the word. We use m to approximate the number of syllables.
+[C] (VC) ^m[V] is a measure of the word. We use m to approximate the number of syllables.
 <img width="575" height="181" alt="image" src="https://github.com/user-attachments/assets/8cab3e6d-cdbb-440e-9b6f-37d883149dbb" />
 
