@@ -304,3 +304,16 @@ Over-stemming
 - two words are stemmed to the same root when they should have benn treated as separate
 - Example: universal, university, universe → univers
 Under-stemming
+- Two separate inflected words should be stemmed to the same root but are stemmed to different roots
+- Example: alumnus -> alumnu
+           alumna -> alumna
+           alumni -> alumni
+
+### Lemmatization
+
+Downsides: complexity and need for knowledge and understanding of the context. Example : saw-> (to) see | (the) saw
+
+## Stemming vs. Lemmatization
+
+<img width="691" height="306" alt="image" src="https://github.com/user-attachments/assets/6d7d33ad-c0a7-46a2-961e-c554cac054eb" />
+
