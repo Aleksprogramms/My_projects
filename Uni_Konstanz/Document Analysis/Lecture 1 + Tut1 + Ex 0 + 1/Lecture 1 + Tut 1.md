@@ -203,4 +203,117 @@ Clitic:
 
 # Text Segmentation
 
-// TODO
+## Segments of Text
+
+- Volumes
+- Books
+- Chapters
+- Paragraphs
+- Sentences
+- Tokens (and punctuation)
+- Characters
+
+
+## Naive Sentence Splitting Algorithm
+
+<img width="887" height="500" alt="image" src="https://github.com/user-attachments/assets/19238ee7-4732-4e41-aa6a-688623a54301" />
+
+## Tokenization: Terminology
+
+Token: 
+- The occurence of a word in a text
+Tokenization:
+- Segmentation of an input stream into an ordered sequence of tokens
+Tokenizer:
+- A system that splits texts into word tokens
+
+Example: 
+- Input text: John likes Mary and Mary likes John.
+- Tokens: {"John", "likes", "Mary", "and", "Mary", "likes", "John", "."}
+
+## Naive Tokenization
+
+Naive approach:
+- Split tokens at whitespace characters
+- Input: Mr. Sherwood said, reaction to Sea Containers‘ proposal has been „very positive.“ In New York Stock Exchange composite trading yesterday, Sea Containers closed at $62.625, up 62.5 cents.
+- (Partial) output: {said,   positive.”   $62.625,   cents.}
+
+## Tokenization Algorithm: Maximum Maatching
+
+Core idea:
+- Consider the input sentence as a simple word sequence
+- Use a dictionary
+- Start at the beggining of the sentence
+- Search for the longest matching string in the dictionary and cut
+- Start matching against the dictionary again
+
+(English) example matching:
+<img width="1184" height="311" alt="image" src="https://github.com/user-attachments/assets/654d28ef-91c3-448b-8a32-edd147a3dd60" />
+Obvious problem: Greedy matching makes locally optimal choices
+
+# Token Normalization
+
+## Stemming and Lemmatization
+
+Recall: 
+- Tokenization (ideally) returns word occurrences in a text
+- Word occurence frequenccies are zipf distributed
+- Due to morphological variants, many word occurrences will be unique
+  E.g. computerization, computer, computing, computation
+
+To make these words comparable, we want to normalize them by grouping them into equivalence classes. This can be done by reducing them to a root morpheme by:
+- stemming, which reduces a word to its stem(comput) or
+- lemmatization, which reduces a word to its lemma (compute)
+
+Since {computerization, computer, computing, computation} are all derived from the same root, we can then combine their occurences in our corpus statistics.
+
+## Porter Stemmer
+
+A simple approach:
+- We effectively chop off the end of the word!
+- Only suffixes are considered for removal
+- Frequently used algorithm
+- Results are pretty ugly
+
+<img width="762" height="203" alt="image" src="https://github.com/user-attachments/assets/0b582b02-3d97-4e6b-95f5-918493c363b2" />
+
+### Porter Stemmere Algorithm
+Core idea
+- Consecutively remove/replace suffixes
+- The number of iterations depends on the 'syllables' of the word
+- In each step, one rule from a fixed set of rules is applied
+- No rule may be applied twice
+- Once no rule can be applied, the algorithm stops
+
+### Porter Stemmer: Measure of a word
+
+V - sequence of vowels
+C - sequence of consonants
+[C] (VC)^m [V] is a measure of the word. We use m to approximate the number of syllables.
+<img width="575" height="181" alt="image" src="https://github.com/user-attachments/assets/8cab3e6d-cdbb-440e-9b6f-37d883149dbb" />
+
+### Porter Stemmer: Application of Rules
+
+Each rule comes with a constraint that determinees when it can be applied, which uses the measure. For Example:
+<img width="1145" height="384" alt="image" src="https://github.com/user-attachments/assets/83fc9bd1-9bfe-473d-82b5-145fde771838" />
+
+## Stemming: Evaluation
+Two types of errors:
+
+Over-stemming
+- two words are stemmed to the same root when they should have benn treated as separate
+- Example: universal, university, universe → univers
+Under-stemming
+- Two separate inflected words should be stemmed to the same root but are stemmed to different roots
+- Example: alumnus -> alumnu
+           alumna -> alumna
+           alumni -> alumni
+
+### Lemmatization
+
+Downsides: complexity and need for knowledge and understanding of the context. Example : saw-> (to) see | (the) saw
+
+## Stemming vs. Lemmatization
+
+<img width="691" height="306" alt="image" src="https://github.com/user-attachments/assets/6d7d33ad-c0a7-46a2-961e-c554cac054eb" />
+
