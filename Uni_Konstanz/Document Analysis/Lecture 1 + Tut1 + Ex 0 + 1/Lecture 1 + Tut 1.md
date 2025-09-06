@@ -292,3 +292,15 @@ C - sequence of consonants
 [C] (VC)^m [V] is a measure of the word. We use m to approximate the number of syllables.
 <img width="575" height="181" alt="image" src="https://github.com/user-attachments/assets/8cab3e6d-cdbb-440e-9b6f-37d883149dbb" />
 
+### Porter Stemmer: Application of Rules
+
+Each rule comes with a constraint that determinees when it can be applied, which uses the measure. For Example:
+<img width="1145" height="384" alt="image" src="https://github.com/user-attachments/assets/83fc9bd1-9bfe-473d-82b5-145fde771838" />
+
+## Stemming: Evaluation
+Two types of errors:
+
+Over-stemming
+- two words are stemmed to the same root when they should have benn treated as separate
+- Example: universal, university, universe → univers
+Under-stemming
