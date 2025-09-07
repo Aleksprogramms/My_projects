@@ -1,5 +1,4 @@
-
-#Private-Key Encryption
+# Private-Key Encryption
 
 A private-key enctyrption specified by a message space M and three algorithms:
 
