@@ -118,4 +118,4 @@ Importance of clear  assumptions:
 Principles of Modern Cryptography \
 Principle 1: Formal definitions \
 Principle 2: Precise assumptions \ 
-Principle 3L Proofs of security \
+Principle 3: Proofs of security \
