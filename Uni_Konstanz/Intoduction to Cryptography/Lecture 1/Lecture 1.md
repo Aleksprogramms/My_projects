@@ -114,6 +114,7 @@ Importance of clear  assumptions:
 - Without a proof, we are left with our intuition
   - Experience shows that intuition about security is often disastrous
   - Countless examples of unproven schemes that were broken; sometimes immediately and sometimes years after deployment
+
 Principles of Modern Cryptography
 Principle 1: Formal definitions
 Principle 2: Precise assumptions
