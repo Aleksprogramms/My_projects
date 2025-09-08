@@ -25,17 +25,29 @@ def read_lorem_ipsum_text():
 
 def read_xml():
     """Read in xml files"""
+    comp = ""
     for i in os.listdir(FILEPATH_DEBATES_XML):
         tree = ET.parse(FILEPATH_DEBATES_XML + i)
         root = tree.getroot()
-        return ET.dump(root)
-
-# //TODO
-def read_scv():
-    for i in os.listdir(FILEPATH_TV_CSV):
-        file = pd.read_csv(FILEPATH_TV_CSV + i)
+        for line in root.findall(".//utterance[@name = 'Trump']"):
+            comp += line.text.strip() + " "
+        for line in root.findall(".//utterance[@name = 'Clinton']"):
+            comp += line.text.strip() + " "
+        for line in root.findall(".//utterance[@name = 'Moderator']"):
+            comp += line.text.strip() + " "
+            
+    return comp
         
-    return file
+
+
+def read_scv():
+    """Read in csv files"""
+    whole_text = ""
+    for i in os.listdir(FILEPATH_TV_CSV):
+        
+        whole_text += pd.read_csv(FILEPATH_TV_CSV + i)["transcript"].to_string(index= False) + " "
+    
+    return whole_text
     
 def create_word_cloud(wordFrequencies, title):
     print(title + ':')
@@ -49,6 +61,3 @@ def create_word_cloud(wordFrequencies, title):
     plt.axis("off")
     plt.imshow(wordcloud, interpolation='bilinear')
     plt.show()
-
-
-print(read_scv())
