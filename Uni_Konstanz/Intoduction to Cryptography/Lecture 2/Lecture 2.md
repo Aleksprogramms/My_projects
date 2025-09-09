@@ -93,3 +93,7 @@ Equivalent formulation of perfect secrecy:
 
 Pr[Enc(k,m) = c] = Pr[Enc(k,m') = c]
 
+# Perfect (adverarial) indistinguishability experiment
+
+1. The adversary A outputs a pair of messages m0,m1 ∈ M.
+2. A key k is generated using KGen, and a uniform bit b ∈ {0,1} is chosen. Ciphertext c <- Enc_k(m_b)
