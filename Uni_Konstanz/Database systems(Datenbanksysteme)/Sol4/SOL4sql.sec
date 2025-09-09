@@ -1,0 +1,121 @@
+--1a
+WITH star_wars_id as (SELECT t2.name
+FROM themes t1
+JOIN themes t2 on t1.id = t2.parent_id			  
+WHERE t1.name = 'Star Wars')
+
+SELECT * FROM star_wars_id
+
+
+--1b
+WITH RECURSIVE star_wars_id(id, name, parent_id) as (   SELECT t.id, t.name, t.parent_id
+														FROM themes t			  
+														WHERE t.name = 'Star Wars' 
+													 
+														UNION ALL
+
+														SELECT t.id, t.name, t.parent_id
+														FROM themes t
+														JOIN star_wars_id swi on t.parent_id = swi.id )
+
+SELECT name FROM star_wars_id where name != 'Star Wars'
+
+--1c
+WITH RECURSIVE star_wars_id(id, name, parent_id) as (   SELECT t.id, t.name, t.parent_id
+														FROM themes t			  
+														WHERE t.name = 'Star Wars' 
+													 
+														UNION ALL
+
+														SELECT t.id, t.name, t.parent_id
+														FROM themes t
+														JOIN star_wars_id swi on t.parent_id = swi.id )
+
+SELECT s.name 
+FROM star_wars_id swi
+JOIN sets s on s.theme_id = swi.id
+where swi.name != 'Star Wars'
+ORDER BY s.name ASC
+
+--2
+
+-- ex2
+
+CREATE TABLE Bars (
+	
+	bar  VARCHAR (20) not null,
+	address VARCHAR (50) ,
+	capacity INTEGER not null,
+	constraint capacity check (capacity > 0),
+	phone CHAR (12) ,
+	owner VARCHAR (20),
+	
+	Primary Key(bar),
+	UNIQUE(bar,owner)
+);
+
+CREATE TABLE Beverages (
+	beverage VARCHAR (40) not null ,
+	producer VARCHAR (40) not null,
+	
+	Primary Key(beverage),
+	Unique(producer)
+	
+) ;
+
+CREATE TABLE Serves (
+	
+	bar VARCHAR (20) not null,
+	beverage VARCHAR (40) not null,
+	price NUMERIC (4 ,2) not null,
+	constraint price check (price >= 0),
+	
+	Primary Key(bar),
+	
+	Foreign Key(bar) REFERENCES Bars (bar),
+	
+	Foreign Key(beverage) REFERENCES Beverages (beverage)
+	
+) ;
+
+
+CREATE TABLE Persons (
+	name VARCHAR (20) not null,
+	age INTEGER not null,
+	constraint age check (age > 0),
+	occupation VARCHAR (20) ,
+	salary NUMERIC (10 ,2) not null,
+	constraint salary check (salary >= 0),
+	Primary Key(name),
+	
+	Foreign Key(name) REFERENCES Beverages (producer),
+	Unique(name)
+);
+
+
+CREATE TABLE Likes (
+	person VARCHAR (20) not null,
+	beverage VARCHAR (40) not null,
+	
+	day INTEGER not null,
+	constraint capacity check (day >= 1 and day <= 7),
+	
+	Primary Key(person, beverage),
+	
+	Foreign Key(beverage) REFERENCES Beverages (beverage),
+	
+	Foreign Key(person) REFERENCES Persons (name)
+);
+
+
+CREATE TABLE Frequents (
+	person VARCHAR (20) not null,
+	bar VARCHAR (20) not null,
+	day INTEGER not null,
+	constraint capacity check (day BETWEEN 1 and 7),
+	Primary Key(person, bar),
+	
+	Foreign Key(person) REFERENCES Persons (name),
+	
+	Foreign Key(bar) REFERENCES Bars (bar)
+); 

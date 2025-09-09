@@ -1,0 +1,37 @@
+--3a
+
+SELECT name, year, rank
+FROM movies
+Where rank <= 4;
+
+--3b
+
+SELECT name, year
+From movies
+Where name Like '%Terminator%' and rank IS NOT NULL;
+
+--3c
+
+SELECT DISTINCT genre
+FROM movies_genres;
+
+--3d
+
+SELECT m.name, m.year, mg.genre
+FROM movies m
+Join movies_genres mg ON mg.movie_id = m.id  
+Where m.year > 1999 and mg.genre = 'Action';
+
+--3e
+
+SELECT m.name, mg.genre
+FROM movies m
+Join movies_genres mg ON mg.movie_id = m.id
+Where (mg.genre = 'Horror' or mg.genre = 'Romance');
+
+--3f 
+SELECT m.name, mg1.genre, mg2.genre
+FROM movies m
+Join movies_genres mg1 ON mg1.movie_id = m.id
+Join movies_genres mg2 ON mg2.movie_id = m.id
+Where mg1.genre = 'Horror' and mg2.genre = 'Romance';
