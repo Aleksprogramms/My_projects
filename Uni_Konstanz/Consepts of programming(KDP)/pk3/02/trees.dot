@@ -1,0 +1,12 @@
+graph "AST"
+{
+   root [label="&"];
+   root -- a;
+   a [label="T"];
+   root -- b;
+   b [label="|"];
+   b -- c;
+   c [label="T"]
+   b -- d;
+   d [label="F"];
+}

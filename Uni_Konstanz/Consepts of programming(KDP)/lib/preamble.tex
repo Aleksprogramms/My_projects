@@ -1,0 +1,28 @@
+\usepackage{stmaryrd}
+\usepackage{newunicodechar}
+\newunicodechar{ℤ}{\ensuremath{\mathbb{Z}}}
+\newunicodechar{⊥}{\ensuremath{\bot}}
+\newunicodechar{∈}{\ifmmode\in\else$\in$\fi}
+\newunicodechar{⟦}{\ifmmode\llbracket\else$\llbracket$\fi}
+\newunicodechar{⟧}{\ifmmode\rrbracket\else$\rrbracket$\fi}
+
+\usepackage{framed}
+
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines,frame=single,rulecolor=gray}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\},breaklines,samepage}
+
+\definecolor{shadecolor}{RGB}{248,248,248}
+
+\makeatletter
+\renewenvironment{Shaded}{%
+  \def\FrameCommand##1{\fboxsep=\FV@FrameSep\hskip\@totalleftmargin \hskip-\fboxsep
+  \fcolorbox{shadecolor!50!black}{shadecolor}{##1}\hskip-\fboxsep
+      % There is no \@totalrightmargin, so:
+      \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+  \MakeFramed {\advance\hsize-\width
+    \@totalleftmargin\z@ \linewidth\hsize
+    \@setminipage}%
+ }{\par\unskip\@minipagefalse\endMakeFramed}
+\makeatother
+

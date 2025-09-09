@@ -1,0 +1,22 @@
+x und "text" cases :
+
+Wenn Sie 42 durch die Variable x oder den String "text" ersetzen, haben Sie wahrscheinlich False erhalten. Das liegt daran, dass Haskell an dieser Stelle einen bestimmten Typ erwartet. Wenn x nicht definiert ist, gibt Haskell automatisch False zurück, da es x nicht als gültigen Wert interpretieren kann.
+Dasselbe gilt für den String "text", da Haskell einen numerischen Wert erwartet, aber stattdessen einen String erhält, was ebenfalls zu False führt.
+1 \div` 0` case:
+
+Dieser Ausdruck führt zu einem Fehler aufgrund der Division durch null, da die Operation div für eine Division durch null nicht definiert ist. Haskell gibt einen Fehler aus, da es diese Operation nicht ausführen kann.
+1 / "text" case:
+
+Dieser Ausdruck führt zu einem Typfehler, da der Operator / in beiden Operanden Zahlen erwartet, und der String "text" kann nicht als Zahl interpretiert werden. Daher meldet Haskell einen Typfehler.
+
+Warum verhält sich Haskell so?
+Haskell ist eine streng typisierte Sprache und erwartet, dass alle Ausdrücke einen korrekten und kompatiblen Typ haben. Wenn ein Ausdruck nicht den erwarteten Typ hat (z. B. ein String statt einer Zahl oder eine Division durch null), gibt Haskell entweder False zurück (im Fall einer ungültigen Variablen oder eines Wertes) oder löst einen Fehler aus (bei Division durch null oder inkompatiblen Typen).
+
+Dieses Verhalten ist Teil des strengen Typsystems von Haskell, das dazu beiträgt, Fehler zu vermeiden und die Zuverlässigkeit von Programmen zu erhöhen.
+
+[JFM] Interessanter Ansatzt, der tatsächliche Grund liegt aber woanders (lazy evaluation).
+[JFM] Tatsächlich wäre es ziemlich gefährlich, unerwartete und eventuell ungültige Typen von sich aus in ein validen Wert umzuwandeln.
+[JFM] Das würde zu unerwarteten und schwierig zu findenen Fehlern führen, die das Debuggen deutlich erschweren.
+
+[JFM] Die einzelnen screenshots zum Testen wären nicht nötig gewesen, es ging allein darum, sich ein wenig mit Ausdrücken in Haskell vertraut zu machen.
+[JFM] Dafür fehlt das bearbeitete .lhs file. Also die Funktionsweisen und Benennung der Funktionen foo, bar, xxx.
