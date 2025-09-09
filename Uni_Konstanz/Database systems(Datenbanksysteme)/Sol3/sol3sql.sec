@@ -1,0 +1,219 @@
+--1a
+--(i)   Find the names of sets of LEGO with categorie of "Plants and Animals" and which inventory has parts in Dark Orange colour
+--(ii)  Find the names of sets of LEGO which are with a theme 'Castle', but the category is not 'Minifigs'
+--(iii) Find the person with the most amount of parts in all sets
+
+--1b
+--i
+SELECT s.name
+FROM sets s
+JOIN inventories i on i.set_num = s.set_num
+JOIN inventory_parts ip on ip.inventory_id = i.id
+JOIN colors c on c.id = ip.color_id
+WHERE c.name = 'Pink'
+GROUP BY s.name
+HAVING SUM(ip.quantity) >= 10
+
+--ii
+SELECT p.name 
+FROM persons p
+WHERE p.name not IN    (SELECT DISTINCT p.name
+						FROM sets s
+						JOIN owns o on o.set_num = s.set_num
+						JOIN persons p on p.id = o.person_id
+						JOIN themes t on t.id = s.theme_id
+						WHERE t.name NOT LIKE '%Star Wars%')
+						
+--iii
+SELECT DISTINCT p.name
+FROM persons p
+WHERE p.name not in (
+						SELECT p.name
+						FROM persons p
+						JOIN owns o on o.person_id = p.id
+						JOIN sets s on s.set_num = o.set_num
+						WHERE s.set_num NOT IN (
+												SELECT s.set_num
+												FROM sets s
+												JOIN inventories i on i.set_num = s.set_num
+												JOIN inventory_parts ip on ip.inventory_id = i.id
+												JOIN colors c on c.id = ip.color_id
+												WHERE c.name = 'Black'))
+												
+--iv
+
+SELECT s.year, s.name, s.num_parts
+FROM sets s
+WHERE NOT EXISTS (SELECT *
+				  FROM sets s2
+				  WHERE s2.year = s.year AND s2.num_parts > s.num_parts)
+ORDER BY s.year
+
+--2a
+
+-- Difference between this querries is that, the first one has prior on year, 
+-- so this means that we will have the lowest year and then we will get the desending amount of parts, for the year
+-- in the second querry, firstly we see the biggest amount of parts, and then seeing the year for this set
+
+--2b
+
+SELECT t . name, t.parent_id
+FROM themes t
+ORDER BY t . name ;
+
+SELECT t . name
+FROM themes t
+JOIN themes p ON p . id = t . parent_id
+ORDER BY t . name ;
+-- First querry has more rows, because some of parent_id's are NULL and we can not join them. As i understood, parent_id shows, if the theme is original
+-- Like theme 'Bionical' can has some additional themes like 'Bionical:.....' 
+
+-- Querry for missing rows
+SELECT t . name
+FROM themes t
+WHERE t.parent_id is NULL
+ORDER BY t.name
+
+--2c ?? 
+
+SELECT name
+FROM sets
+WHERE name LIKE '%Wizard%' or name LIKE '%Dragon%';
+
+SELECT name
+FROM sets
+WHERE name LIKE '%Wizard%'
+UNION
+SELECT name
+FROM sets
+WHERE name LIKE '%Dragon%';
+
+-- UNION uses distinct function, results are equal, but one row repeats 2 times
+
+
+SELECT DISTINCT name
+FROM sets
+WHERE name LIKE '%Wizard%' or name LIKE '%Dragon%';
+
+--2d
+
+SELECT s.name,  s.theme_id
+FROM sets s
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+JOIN themes t on t.id = s.theme_id
+WHERE p.name = 'Chandler Muriel Bing' AND NOT t.name = 'Tiny Turbos'
+
+SELECT s.name, s.theme_id
+FROM sets s
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+JOIN themes t on t.id = s.theme_id
+WHERE p.name = 'Chandler Muriel Bing' AND s.name NOT IN (SELECT s.name 
+														 FROM themes t
+														 JOIN sets s on s.theme_id = t.id
+														 WHERE t.name = 'Tiny Turbos')
+
+-- Differenct between this two querries is that, some sets have different themes, that is why we don't exclude sets with sets not only with theme Tiny Turbos
+
+SELECT s.name, s.theme_id
+FROM sets s
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+JOIN themes t on t.id = s.theme_id
+WHERE p.name = 'Chandler Muriel Bing' AND s.theme_id NOT IN (SELECT s.theme_id
+														 FROM themes t
+														 JOIN sets s on s.theme_id = t.id
+														 WHERE t.name = 'Tiny Turbos')
+
+--2e
+
+SELECT p.name, COUNT(*)
+FROM inventory_parts ip
+JOIN parts p ON p.part_num = ip.part_num
+GROUP BY p.part_num
+ORDER BY COUNT(*) DESC;
+
+
+SELECT p.part_num, COUNT(*)
+FROM inventory_parts ip
+JOIN parts p ON p.part_num = ip.part_num
+GROUP BY p.name
+ORDER BY COUNT(*) DESC
+
+-- in the second query, we can't use name for group by, because it's not a primary key for this table
+
+--3a 
+
+
+SELECT s.set_num
+FROM sets s
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+WHERE p.name = 'Joseph Francis Tribbiani'
+
+
+--3b
+
+SELECT i.id
+FROM inventories i
+JOIN sets s on s.set_num = i.set_num
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+WHERE p.name = 'Joseph Francis Tribbiani' and i.version = 1
+					
+--3c
+
+SELECT ip.part_num, ip.color_id, sum(ip.quantity)
+FROM inventory_parts ip
+JOIN inventories i on i.id = ip.inventory_id
+JOIN sets s on s.set_num = i.set_num
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+WHERE p.name = 'Joseph Francis Tribbiani' and i.version = 1
+GROUP BY ip.part_num, ip.color_id
+
+
+
+--3d
+
+with parts_that_joey_has as (SELECT ip.part_num, ip.color_id, sum(ip.quantity) as sum_q
+FROM inventory_parts ip
+JOIN inventories i on i.id = ip.inventory_id
+JOIN sets s on s.set_num = i.set_num
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+WHERE p.name = 'Joseph Francis Tribbiani' and i.version = 1
+GROUP BY ip.part_num, ip.color_id)
+
+select ip.inventory_id, SUM (Least(sum_q, ip.quantity))
+FROM parts_that_joey_has ptjh
+JOIN inventory_parts ip on ip.part_num = ptjh.part_num and ip.color_id = ptjh.color_id
+GROUP BY ip.inventory_id
+
+--3e
+
+with parts_that_joey_has as (SELECT ip.part_num, ip.color_id, sum(ip.quantity) as sum_q
+FROM inventory_parts ip
+JOIN inventories i on i.id = ip.inventory_id
+JOIN sets s on s.set_num = i.set_num
+JOIN owns o on o.set_num = s.set_num
+JOIN persons p on p.id = o.person_id
+WHERE p.name = 'Joseph Francis Tribbiani' and i.version = 1
+GROUP BY ip.part_num, ip.color_id)
+
+select ip.inventory_id, (SUM (Least(sum_q, ip.quantity)) / s.num_parts) as ratio_p
+FROM parts_that_joey_has ptjh
+JOIN inventory_parts ip on ip.part_num = ptjh.part_num and ip.color_id = ptjh.color_id
+JOIN inventories i on i.id = ip.inventory_id
+JOIN sets s on s.set_num = i.set_num
+WHERE i.version = 1 and ip.is_spare = 'f'
+GROUP BY ip.inventory_id, s.num_parts
+HAVING (SUM (Least(sum_q, ip.quantity)) / s.num_parts) != 0
+ORDER BY (SUM (Least(sum_q, ip.quantity)) / s.num_parts) DESC
+
+
+
+
+
+
