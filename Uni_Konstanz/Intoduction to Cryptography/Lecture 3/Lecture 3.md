@@ -406,3 +406,7 @@ Ctr mode is fully parallelizable
 If F is a pseudorandom function, then CTR mode is CPA-secure for multiple encryptions.
 
 ![alt text](image-33.png)
+
+
+
+
