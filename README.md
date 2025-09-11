@@ -21,7 +21,7 @@ Command-line pixel art and turtle (Python) visualizations live here.
 
 ### 🔹 Personal_Projects  
 My own pet projects — small tools, bots, and experiments outside of class.  
-Mostly written in Python and Java.
+Mostly written in Python.
 
 ---
 
