@@ -1,7 +1,19 @@
-# projects
+# Aleksandr Belous' project/achievements/studies
 
-Here is the compilation of my projects :) 
+# Folders
 
+## CS50
 
-Hope u like it
+My projects/summaries/code from this course
 
+## Uni_Konstanz
+
+My projects/summaries from University
+
+##Drawings
+
+I really to draw in command lines and with Turtle(python)
+
+## Personal_projects
+
+Actually, it's my pet-projects:) 
