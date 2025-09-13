@@ -161,4 +161,109 @@ We can use many different kinds of sequence models for NER:
     - Transformers
 
 
-# Named 
+# Named Entity Disambiguation and Linking
+
+## Named Entity Ambiguities
+
+The Tesla chief executive ..... Who? Company? Person? Unit?
+
+
+## Handing Ambiguity: Normalization
+
+Normalization: Reducing or rewriting something to a common (normal) form. Example:
+
+- Mathematics: normalizing a fraction
+    - 1/2 = 2/4
+
+- Mathematics: normalizing a vector to unit length
+
+    - v' = v / |v|
+
+- Formal grammars:
+    - Chomsly Normal Form for CFGs
+
+- Databases:
+    - 1NF, 2NF, 3NF, EKNF, etc.
+
+- Person names:
+    - Donald Trump, also known as: Donald J. Trump, POTUS, 45-47, President Trump...
+
+## Named Entity LInking: Algorithmic Approach
+
+How can we match entity mentions in a text to identidiers in a knowledge base? This is often modeled as a ML prediction task: Given an entity mention in a text, predict the most likely corresponding entity in a knowldege base.
+
+Core  steps:
+
+- Mention detection  (= named entity recognition)
+- Candidate generation (= string matching to knwoledge base entries)
+- Candidate ranking using features:
+    - Context features: tokens around the entity mentions
+    - Knowledge graph context: text features frfom the knowledge graph
+    - Knowldge pgraph strcutural features (e.g. graph centratility)
+    - Unambiguous entity mentions in the contex
+    - Heuristic feautres (e.g., overall popularity of an entity)
+
+
+## Drawbacks of Knowledge Graphs
+
+Engineering the structure of a knowledge graph(an ontology) is difficult and subjective, but directly affects how useful it is. Examples:
+
+- Place categories in Wikidata: Are they populated places or levels in an organizational hierarchy?
+- Jesus in Wikidata: A person? God? A prophet? Real or fictional?
+
+## Normalization of Temporal Expressions
+
+For temporal expressions, we can use a rule-based normalization rather than linking them to a knowledge graph. For example:
+
+January 12, 2022 at 2pm → 2022-01-12 14:00 UTC
+
+But different types of temporal expressions require different rules for normalization:
+
+- Absolute temporal expressions
+    - January 12, 2022; International Worker’s Day 1997; during the Council of Constance
+- Relative temporal expressions
+    - yesterday; this afternoon; the day before
+
+## Domain Dependence of Temporal Expressions
+
+For relative temporal expressions, a reference time is necessary, which requires domain knowledge to retrieve.
+
+News-style texts: Use publicatin metadata
+
+- Elon Musk revelaed on Thursday that..
+- New article published on Saturday, 16.04.2022
+- Thursday -> 2022-04-14
+
+Narrative texts: use preceding information in paragraph
+
+- Keep track of last mentioned date
+- Use as reference for normalization
+
+# NE-based Application: Implicit Entity Networks
+
+##  Implicit Network vs. Knowledge Graphs
+
+![alt text](image.png)
+
+## Generating Implicit Networks from a Corpus
+
+![alt text](image-1.png)
+
+## Implicit Netwoks: Pipeline Architecture
+
+![alt text](image-2.png)
+
+## Extracting Implicit Entity Relations
+
+Problem: How can we discover complex relations for (a set of) emtities?
+Query: ⟨Location | Barack Obama, Hillary Clinton⟩
+
+![alt text](image-3.png)
+
+![alt text](image-4.png)
+
+## Demonstration: Interactive Entity-centric Search
+
+https://evelin.ifi.uni-heidelberg.de 
+
+
