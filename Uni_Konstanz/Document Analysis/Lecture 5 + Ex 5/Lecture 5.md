@@ -292,4 +292,106 @@ Frequent terms:
 
 -> We wnat positive weights for frequent terms (but lower than for rare terms)
 
+## Inverse Document Frequency (IDF)
 
+The document frequency df_t of term t is defined as the number of documents in the corpus in which t occurs.
+
+- We can use df_t to account for the rarity of t when computing the matching score
+- The document frequency is an inverse measure of the informativeness of a term
+-> We need to inver it
+
+The inverse document frequency idf_t is a mesaure of the informativeness of the term. We define the idf_t weight ot term t as:
+
+![alt text](image-7.png)
+
+Where N is the number of documents. We use log N/dt_t instead of N/df_t as a heuristic to "dampen" the effect of the invere document frequency.
+
+## Term Frequency-Inverse Document Frequency (TF-IDF)
+
+We combine the term frequency and the inverse document frequency to assign a tf-idf weight w to each term t in each document d:
+
+![alt text](image-8.png)
+
+The weight:
+
+- Increase with the number of occurences of a term within a document
+- Increase with the rarity if the term in the collection
+
+Note: We use log-scaling of term frequencies and assume tf_(t,d) > 0 (otherwise, we set w_(t,d)). Other approaches are possible and there is no rigorous formal reasoning behind this choice. In practice, experimnets help to determine suitable scaling methods.
+
+
+## TF-IDF Weight Matrix
+
+![alt text](image-9.png)
+
+Each document is now represented by a real-valued vector of tf-idf weights
+
+- Weights encode frequency information of terms in documents
+- Frequencies of terms in a documents are normalized by the number of documents in which the term occurs
+
+# Document Similarity
+
+## Documents as Vectors
+
+Each document is now represented by a real-valued vector of tf-idf weights.
+
+- Terms are dimension (= axes) of the corresponidng vector space
+- Documents are points or vectors in this space
+- The vector space is very high-dimensional due to the vocabulary size: Tens of millions of dimensions when building a serach engine at web scale
+- Individual vectors are very sparse: most entries are zero
+
+How is this helpful in querying?
+
+- Idea: Find documents vectors that are similar to the query vector in this space
+-> Finding close points in a vector space is a well-researched problem
+
+## Measuring Distances in Vector Space
+
+Intuitively: Use Euclidean distance between query vector and document vector.
+
+- The Euclidean distance between query and document will be large.
+- This is true even if the distribution of terms in the query and the distribution of terms in the document are very similar
+- Reason: Euclidean distance is large for vectors with mismatching components
+-> Curse of dimensionality
+
+## Curse of Dimensionality
+
+Problem: 
+- When the dimesionality increases, the volume of the space increases exponentially
+- Word vector spaces have very high dimensionality
+
+
+![alt text](image-10.png)
+
+## Using Angular Similarity
+
+Solution:
+
+- Rank documents according to their angular distance from the query
+
+Thought experiment:
+
+- Take a document d and append it to itself. Call this document d'
+- "Semantically" d and d' have exactly the same content 
+- The angle between the two documents is 0°, corresponding to maximal similarity
+- But: the Euclidean distance between d and d' scales with the number of tokens in document d
+
+## Cosine Similarity
+
+Since cosine is a monotonically decreasing function for the interval [0°, 180°], the following two notions are equivalent:
+
+- Ranking documents in decreasing order of the angle between query and document
+- Ranking documents in increasing order of cosine (query, document)
+
+![alt text](image-12.png)
+
+## In a Nutshell: A simple search Engine 
+
+We can now construct a simple (yet surprisingly effective) search engine:
+
+- Compute tf-idf weights for all terms in all documetns in the corpus
+- Represent the corpus as a tf-idf weighted term frequency matrix
+- Compute a tf-idf weighted vector representations of the query 
+- Compute the cosine similarity between the query vector and all document vectors
+- Rank the documents non-increasingly by cosine similarity score
+- Return the top 10 results as the 10 blue links
