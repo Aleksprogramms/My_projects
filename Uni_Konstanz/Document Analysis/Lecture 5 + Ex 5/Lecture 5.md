@@ -172,3 +172,124 @@ DistB (qeather, weather) = 1
 DistB (leather, weather) = 2
 
 ![alt text](image-2.png)
+
+# Semantic Similarity
+
+## Semantic Relations
+
+Synonymy:
+
+- Different words with similar meaning (e.g., big| large)
+- Synonyms differ in their frequency of use and the context
+
+Antonymy:
+
+- Words that are near opposites (e.g., raise | lower)
+
+Hypernymy:
+
+- Supertype of  a words (e.g., red is a color)
+
+Hyponymy
+
+- Subtype of a word (inverse of hypernymy)
+
+Meronymy:
+
+- A word is part of lager whole (e.g. a flock of sheep includes a sheep)
+
+## WordNet
+
+WordNet is a database of words and semantic relations between them. The main relation is hypernymy, so the overall structure is tree-like.
+
+![alt text](image-3.png)
+
+Parent hierarchy of the different meanings of bar:
+
+- Barroom, bar → room → area → structure → artifact ... 
+- Bar → counter → table → furniture → ... → artifact ... 
+- Bar → implement → instrumentation → artifact ... 
+- Bar → musical notation → notation → writing → ...
+
+However:
+
+- Not all words share the same root
+- WordNet has multiple roots
+- WordNet is a forest, not just a tree
+
+![alt text](image-4.png)
+
+In principle, the higher the distance the lower the similarity! But there are problems:
+
+- A specific word may not be in any tree
+- Hypernymy edges are not all equeally apart in similarity space
+- Many more detailed graph-based semantic similarity mesaures have been developed
+
+# The Vector Sapce Model
+
+## Boolean Retrieval
+
+The simpliest information retrieval system:
+
+- Create an index of all words in the documents
+- Represent queries as Boolean Expressions (Caesar AND Brutus)
+- The retriecal engine returns all documnets that match the expression
+- Stemming and lemmatization can help to improve recall
+
+## Term-Document incidence Matrix
+
+Indexing and retrieval:
+
+- Create a matrix of the document collection that contains all distinct terms
+- Set the value to 1 if the corresponding document contains the given term
+- Return all documents that have a value of 1 in all cells corresponding to query terms
+
+## Scoring for Ranked Retrieval
+
+But what happens if many document match?
+
+-> we want to return the documents in an order that is likely to be useful to the searcher=
+
+How can we rank (= order) the documents in the collection with respect to a query?
+
+- Assign a score to each document (typically in the range [ 0,1 ])
+- The score measures how well the document and the query "match"
+- We need a way to assign (similarity) score to a query/document pair
+
+![alt text](image-5.png)
+
+## Term frequency Matrix
+
+To have data for a scoring function, term frequency information is helpful:
+
+- We can store term frequency counts instead of binary values in the matrix
+- Each document is now represented by a count vector
+- Note: word order is not retained in a vector. This approach is called bag of words.
+
+![alt text](image-6.png)
+
+### Term frequency
+
+The term frequency tf_(t,d) of document d i defined as the number of times that t occurs in d.
+
+- A document with 10 occurrences of the term Hamlet is more relevant for a query contatining Hamlet than a document with just one occurrence
+- But probably not 10 times more relevant
+
+-> Relevance does not increase propotionally with term frequency
+
+## Rarity of Terms
+
+Rare terms:
+
+- Consider a term in the query that is rare in the corpus 
+- A document contining this term is very likely to be highly relevant
+-> We want large positive weights for rare terms.
+
+Frequent terms:
+
+- Consider a term in the query that is frequent in the corpus
+- A document contining this term is more likely to be relevant than a document that does not, but it is less of an indicator of relevance
+
+-> We wnat positive weights for frequent terms (but lower than for rare terms)
+
+
