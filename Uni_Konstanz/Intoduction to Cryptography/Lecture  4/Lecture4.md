@@ -139,3 +139,123 @@ In standard applications, this is not a concern; in some other, one might one to
 
 We can define the experiment Mac-sForge_(A,П) similar to Mac-Forge_(A,П) with the difference that Q stores pairs of oracle queries and responses and the final check is modified to (m,t) !∈ Q, for (m,t) the output of A.
 
+## Message Authentication Codes (MACs) - Definition
+
+A message authentication code П = (KGen, Mac, Vrfy) is strongly secure, if for all probabilistic polynomail-time adversaries A there is a negligible function negl such that 
+
+![alt text](image-3.png)
+
+It is easy to see that secure MACs using canonical verification are also strongly secure:
+
+Let П = (KGen, Mac, Vrfy) be a secure (deterministic) MAC that uses canonical verification. Then П Is strongly secure.
+
+# Construction Secure Message Authenctication Codes
+
+A fixed-length MACs
+
+Pseudorandom functions are a natural tool for constructing secure MACs
+Idea:
+
+- Tags are obtained by applying a pseudorandom functions
+- Forging a tag requires to guess the output on a "new" input
+- Probability of guessing the output of a random function is 2^ (-n)
+- Probability for a pseudorandom functioncan only be negligibly larger
+
+Let F be a (length preserving) pseudorandom function. Define a fixed-length MAC for messages of length n as follows:
+
+- Mac: on input a key k ∈ {0,1}^n and a message m ∈ {0,1}^n, output the tag t:= F_k(m).
+- Vrfy: on input a key k ∈ {0,1}^n, a message m ∈ {0,1}^n, and a tag t ∈ {0,1}^n, output 1 if and only if t = F_k(m)
+
+
+![alt text](image-4.png)
+
+If F is a pseudorandom function, then this construction is a secure fixed-length MAC for messages of length n.
+
+## Distinguisher D
+
+D is given input 1^n and access to Oracle O: {0,1}^n -> {0,1}^n, and words as follows:
+
+1. Run A(1^n). Whenever A queries its MAC oracle on a message m(i.e., whenever A request a tag on a message m), answer this query in the following way:
+
+Query O with m and obtain response t; return t to A.
+
+2. When A outputs (m,t) at the end of its execution, do:
+
+    2.1 Query O with m and obtain response t'.
+    2.2 If (1) t' = t and (2) A never queried its MAC oracle on m, the output 1; otherwise, output 0.
+
+## Domain Extension for MACs
+
+Construction shows a general paradigm for message authentication codes form pseudorandom functions
+
+Limirations: only messages of fixed-length can be handled, which is unacceptable for most apllications
+
+Next step: Construct a MAC handling arbitary-length messages from a fixed-length MAC 
+-> the construction is not very effictient
+
+Let П' = (Mac', Vrfy') be a secure  fixed-length MAC for messages of length n
+
+![alt text](image-5.png)
+
+1. Split m into block and authenticate each block individually:
+
+m = m1, ...,m_d -> ⟨t1, ..., t_d⟩, with t_i = Mac'_k(m_i)
+
+- Problem: block re-ordering attack
+- If ⟨t1,t2⟩ is a valid tag for message m1, m2(with m1 != m2), then ⟨t2,t1⟩ is a valid tag for message m2,m1
+
+2. Add a block index to each block to prevent the block re-ordering attack:
+
+t_i = Mac'_k(i || m_i) (note that |m_i| < n)
+
+    - Problem: truncation attack
+    - Adversary can simply drop blocks from the end of the message and tag
+
+3. Authenticate the message length to prevent the truncation attack:
+
+t_i = Mac'_k (l||i||m_i) (where l is the length of the message)
+
+- Problem: "mix-and-match" attack
+- Tags ⟨t1, . . . ,td ⟩ and ⟨t'1, . . . ,t'd ⟩ for message m1,...,md and m'1, ..., m'd, respectively -> ⟨t1, t'2, t3, t'4⟩ is a valid tag for message m1, m2', m3, m4', ...
+
+-> We need to add a random "message identifier" r in each block to prevent the "mix-and=match" attack, which leads to Construction
+
+![alt text](image-6.png)
+
+Let П' = (Mac', Vrfy) be a fixed-length MAC for messages of length n. Define a MAC as follows:
+
+- Mac: on input a key k ∈ {0,1}^n and a message m ∈ {0,1}* of (nonzero) length l < 2^(n/4), parse m as d blocks m1, ..., m_d, each of length n/4. (The final block is padded with 0s of necessary.) Choose a uniform message identifier r ∈ {0,1}^(n/4). For i = 1, ..., d, compute t_i <- Mac'_k (r || l || i || m_i), where i, l are encoded as strings of length n/4. Output the tag t:= ⟨r,t1, . . . ,td⟩.
+
+- Vrfy: on input a key k ∈ {0, 1}^n, a message m ∈ {0, 1}* of nonzero length l < 2^(n/4), and a tag t:= ⟨r,t1, . . . ,td′⟩, parse m as d block m1, ..., md, each of length n/4. (The final block is padded with 0s if necessary.) Output 1 if and only if d' = d and Vrfy'_k(r || l || i || m_i,t_i) = 1 for 1<= i <= d.
+
+If П' is a secured fixed-length MAC for messages of length n, then Construction 4.7 is a secure MAC (for arbitary-length messages).
+
+## CBC-MAC
+
+Thereome 4.6 and Theorem 4.8 show that we can construct MACs for arbitrary-length messages from pseudorandom functions
+
+The constructions, however, are extremely inefficient: messages of length d_n require 4d block cipher evaluations and have tags longer than 4dn bits
+
+Fortunately, there are much more efficient constructions like CBC-MAC
+-> CBC-MAC was the first standardized message authentication code
+
+![alt text](image-7.png)
+
+Let F be a pseudorandom function, and fix a length function l(n) > 0. The basic CBC-MAC construction is as follows:
+
+- Mac: on input a key k ∈ {0, 1} ^ n and a message m of length l(n) * n, do the following (set l = l(n) in what follows):
+
+    1. Parse m and m = m1, ..., m_l where each m_i is of length n.
+    2. Set t_0 := 0^n. Then, for i = 1 to l, set t_i:= F_k(t_(i-1) xor m_i)
+
+    Outputs t_l as the tag.
+
+- Vrfy: on input a key k ∈ {0, 1} ^ n, a message m, and a tag t, do: If m is not of length l(n) * n then output 0. Otherwise, output 1 if and only if t = Mac_k(m).
+
+Let l be a polynomial. If F is pseudorandom function, then Construction 4.9 is a secure MAC for messages of length l(n) * n.
+
+Compare to Construction 4.5, basic CBC-MAC can handle longer messages (though still fixed-length)
+
+Compared to Construction 4.7, basic CBC-MAC is much more efficient: only d block-cipher evaluations for a message of length dn a tag of length n (compared to 4d block cipher evaluations and tags of length mpre than 4dn)
+
+# 164
