@@ -258,4 +258,25 @@ Compare to Construction 4.5, basic CBC-MAC can handle longer messages (though st
 
 Compared to Construction 4.7, basic CBC-MAC is much more efficient: only d block-cipher evaluations for a message of length dn a tag of length n (compared to 4d block cipher evaluations and tags of length mpre than 4dn)
 
-# 164
+## CBC-MAC vs. CBC-mode encryption
+
+Basic CBC-MAC is similar to the CBC mode of operation but there are crucial differences:
+
+1. CBC-mode encryption uses a ranom IV, which is crucial for security. CBC-MAC uses no IV (can be viewed as constant IV iv = 0^n), which is also crucial security.
+2. In CBC-mode encryption the intermediate values (t_i in CBC-MAC) are output as part of the ciphertext. CBC-MAC only outputs the final value t_l.
+
+Secure CBC-mAC for arbitary-length messages
+
+Two variants to modify Basic CBC-MAC to handle arbitary-length messages (for simplicity, we assume that the messages have length a multiple of n):
+
+1. Prepend the message m with its length |m| (encoded as an n-bit string), and then compute basic CBC-MAC on the result.
+
+-> Caveat: appending |m| to the end and then computing CBC-MAC is not secure
+
+2. Use two independent keys k1, k2 ∈ {0, 1}^n. Compute basic CBC-MAC of m using k_1 and let t be the result; output ![alt text](image-8.png)
+
+-> Advantage: message length is not required in advance (when starting to compute the tag)
+-> Disadvantage: two keys needed
+-> Trade-off: store only one key k and compute ![alt text](image-9.png) (smaller key but more computation cost)
+
+![alt text](image-10.png)
