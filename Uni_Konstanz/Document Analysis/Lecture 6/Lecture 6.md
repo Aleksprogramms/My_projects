@@ -203,3 +203,138 @@ Distributional Semantics:
 -> we are using word coocurence inforamtion.
 
 Word embeddings derived from principle are called distributed representations (in contrast to localist represenations)
+
+## Cooccurrence: Context and Context Windows
+
+Core idea:
+
+- When a word w appears in a text, its context is the set of words that appear nearby
+- We use the combined contexts to learn the representation of word w
+
+Example (window size = 2) for the word banking:
+
+...decisions [causing a banking crises as] in 2009...
+...Europe [needs unified banking regulations to] replace...
+...India has just [given its banking system a] shot in the arm...
+
+
+# word2vec
+
+## The Cloze Task
+
+Cloze Task:
+
+The cloze test (also called cloze deletion test) is a fill-in-the-blank style examination taks. For example, we can easily fill in this blank:
+
+Natural language processing is all about ____ models.
+
+When using word2vec to create word embeddings, we are essentially training a computer to solve this task on two variantions:
+
+- Given some context, learn to predict a missing word. (this is called contionous bag of words or CBOW)
+- Given a word, learn to predict the context(this is called skipgram)
+
+## From a corpus to Training Data: skipgram
+
+We generate training data by:
+
+- Iterating over the corpus step-by=step with a fixed window size 
+- Extracting pairs of the input word in the center of the window and one target word
+![alt text](image-7.png)
+![alt text](image-8.png)
+Generating training data for CBOW works the same way, except input and target words are reversed.
+
+## From a corpus to Training DataL Negative Samppling
+
+We have so far generated on;y positive example(words that actually do cooccur)
+
+- Training a classifier only on this data would be pointless!
+- Learning nothing and always predicting cooccurrence would result in perfect accuracy
+-> We need to add negative examples by picking random output words
+
+![alt text](image-9.png)
+
+## Word2vec: Model Intialization
+
+Word2vec is a shallow network architecture with just tow layers. The layers are an embedding layer (used for learning representations of the input words) and a context layer (used for learning represenatations of the output words).
+
+The matrices are initialized with random values. The embedding size is the selected dimensionality of our latent space (typically 300 dimensions).
+
+![alt text](image-10.png)
+
+## Word2vec: Model Training (1)
+
+When training word2vec, we repeatedly iterate over the training data.
+
+- For each input word, we find the corresponding row in the embedding matrix and retrieve the current embedding
+- For the positive and negative output words, we find the corresponding rows in the context matrix and retrieve the current embeddings
+
+![alt text](image-11.png)
+
+![alt text](image-12.png)
+
+## Word2vec: Model Training (2)
+
+For each embedding-context pair, we compute the dot product (~ cosine similarity)
+
+- The similarity is used topredict the likelihood of the target occuring in the context
+- We use the error to update the embeddings in both matrices
+- This process is repeated for multiple cycles over all data points until it converges
+
+![alt text](image-13.png)
+
+## Word2vec: Output 
+
+After convergence is reached, we discard the context matrix and use the embedding matrix for our word embeddings. Each row contains the embedding of the corresponding word in the vocanbulary. 
+
+![alt text](image-14.png)
+
+## How word2vec Works Intuitively
+
+Why does word2vec produce word embeddings that produce meaningful word similarity?
+
+- During Intialization, each word starts at a random location in the latent space
+- During training, each word is pulled closer towards frequently cooccurring words
+- During training, each word is pushed away from non-cooccuring words
+- Words end up in the proximilty of other words that occur in similar contexts
+- Think of it as similutaneous high-dimensional tug-of-war
+
+![alt text](image-15.png)
+
+## Dense word embeddings: Visulaized 
+
+![alt text](image-16.png)
+
+# Compositional Semantics
+
+## Additive Compositionality
+
+Word2vec was created with the idea of supproting arithmetic solution of analogy tasks:
+
+king - man + woman = queen
+
+![alt text](image-17.png)
+
+##  Compositional Semantics in a Nutshell
+
+The idea behind compositional semantics:
+
+- Common semantic concepts are implicity encoded as directions in the latent space
+    - Gender
+    - Verb tenses
+    - Country/capital relations
+    - etc.
+
+- The relevance of this is hard to overstate:
+    Being able to arithmetically solve semantic challenges on data from an ussupervised model is a huge step towards machine intelligence! 
+
+
+But this ability of language models was (and still is) severely overhyped....:))))
+
+
+## Word of Caution: Similarity != Relatedness
+
+Word embeddings can be used for many downstream applications. Make sure that the assumptions used when applying them match the assumptions made during training!
+
+![alt text](image-18.png)
+
+![alt text](image-19.png)
