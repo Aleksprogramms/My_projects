@@ -204,3 +204,35 @@ An example where CCA-security is needed but authenticated encryption is not: key
 
 # Authenticated Encryption Schemes
 
+Generic Constructions
+
+Idea: any reasonable combination of CPA-secure encryption sheme and a secure message authentication code should result in an authenticated encryption sheme
+
+There are three approaches on how to combine a CPA-secure encryption П_E = (Enc, Dec) and a secure message authentication code П_M = (Mac, Vrfy):
+
+1. Encrypt-and-authenticate
+2. Authenticate-then-encrypt
+3. Encypt-then-authenticate
+
+For all variants, we assume that independent keys are used, i.e., k_E is used for П_E while k_M is used for П_M
+
+![alt text](image-19.png)
+
+Encrypt-and-authenticate
+
+Secure? No. Reason: Tag t might reveal the entire message
+
+Authenticate-then-encrypt
+
+Secure? No. Reason: Padding Oracle Attack. Assume that there are different error messages for padding errors and authentication errors: Dec'_(k_E, k_M)(c):
+
+1. Compute m~:= Dec_k_E(c). If an error in the padding is detected, return "bad padding" amd abort
+2. Parse m~ as M || t. IF Vrfy_k_M (m,t) = 1, return m; else, return "authentication failure".
+
+Encrypt-then-authenticate
+
+Secure? Yes
+
+Let П_E be a CPA-secure private-key encryption scheme, and let П_M be a strongly secure message authentication code. Then construction Encrypt-and-authenticate is an authenticated encryption scheme.
+
+# 191
