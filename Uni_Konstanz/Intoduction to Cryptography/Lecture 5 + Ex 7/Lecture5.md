@@ -235,4 +235,66 @@ Secure? Yes
 
 Let П_E be a CPA-secure private-key encryption scheme, and let П_M be a strongly secure message authentication code. Then construction Encrypt-and-authenticate is an authenticated encryption scheme.
 
-# 191
+
+Let П_E = (Enc, Dec) be a private-key encryption scheme and let П_M = (Mac, Vrfy) be a message authentication code, where in each case key generation is done by simply choosing a uniform n-bit key. Define a private-key encryption scheme (KGen', Enc', Dec') as follows:
+
+- KGen': on input 1^n, choose independent, uniform k_E,k_M ∈ {0, 1}^n and output the key (k_E, k_M).
+
+- Enc': on input a key (k_E, k_M) and a plaintext message m, compute c <- Enc_k_E(m) and t <- Mac_k_M(c). Output the ciphertext ⟨c,t⟩.
+
+- Dec' : on input a key (k_E, k_M) and a ciphertext ⟨c,t⟩, first check if Mac_k_M (c,t) = 1. If yes, output Dec_k_E (c); if no, output ⊥.
+
+What happens when we do not use independent keys?
+
+Consider encrypt-then-authenticate from above but using the same k for encryption and authentication, i.e. k = k_E = k_M
+
+Let F be a strong pseudorandom permutation, which inplies that F^(-1) is a strong pseudorandom permutation as well
+
+Define Enc_k(m) = F_k(m || r) for m ∈ {0, 1} ^ n/2 and a uniform r ∈ {0, 1} ^ n/2 -> (this can be shown to be a CPA-secure)
+
+Define Mac_k(c) = F^ (-1)(c);
+
+However, using these two primitives with the same key following the encrypt-then-authenticate methodology, encryption of a message m yields
+
+![alt text](image-20.png)
+
+-> The ciphertext reveals the message in the clear!
+
+## The need for independent keys
+
+The previous example shows that using independent keys is important
+
+Basic principle of cryptography:
+
+Different instances of cryptographic primitives should always use independent keys
+
+# Security Communication Sessions
+
+Application of authenticated encryption: Alice and Bob want to securely communicate for some time (called a communication session during which Alice and Bob will maintain state)
+
+- Let П = (Enc, Dec) be an authenticated encryption scheme
+- if Alice want to send a message m to Bob, she computes c <- Enc_k(m) and sends c to Bob
+- Bob, when receiving c, decrypts it and ignores it if decryption returns ⊥
+
+There are several attacks against the simple approach(not an exhaustive list):
+
+Re-ordering attack: And adversary can swap the order of messages. If Alice send c1(encryption of m1) following by c2 (encryption of m2), swapped messages make Bob first decrypt c2 follow by decrypting c1
+
+Replay attack: An adversary can replay a ciphertext (send it twice); this makes Bob output m twice even though Alice has sent it only once (in form of the ciphertext c)
+
+Message-dropping attack: An adversary can drop some messages. While this cannot generally be prevented, Alice and Bob should be able to detect that.
+
+Redlection attack: An adversary can take a ciphertext c that Alice sent to Bob and instead send it back to Alice; this casuses Alice to output m even though Bob has never sent it.
+
+Using counters can migrate the first three attacks; a directional bit can handle the fourth one
+
+Each party maintains two counters ctr_A and ctr_B,A
+-> counters are initialized to 0 and are increased each time a valid message is send or received
+
+Furthermore, Alice and Bob agree on a bit b_A,B and define b_B,A be its complement
+
+When Alice wants to send a message m to Bob, she computes c <- Enc_k(b_A,B || ctr_A,B || m). sends c to Bob. and increments ctr_A,B
+
+When BOb receives a ciphertext c, he decrypts it; if the result is ⊥, he immediately rejects. Otherwisem he parses the result as b || ctr|| m; if b = b_A,B and ctr = ctr_A,B, then Bob outputs m and increments ctrA,B
+
+the same applies when Bob sends a message to Alice using thje other counter and but
