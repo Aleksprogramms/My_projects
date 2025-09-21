@@ -297,4 +297,5 @@ When Alice wants to send a message m to Bob, she computes c <- Enc_k(b_A,B || ct
 
 When BOb receives a ciphertext c, he decrypts it; if the result is ⊥, he immediately rejects. Otherwisem he parses the result as b || ctr|| m; if b = b_A,B and ctr = ctr_A,B, then Bob outputs m and increments ctrA,B
 
-the same applies when Bob sends a message to Alice using thje other counter and but
+the same applies when Bob sends a message to Alice using thje other counter and bit
+
