@@ -81,3 +81,5 @@ To compute p(d|c), we rewite p(d|c) = p (w1, w2, ..., w_n|c) since d consists of
 Computing the individual p(w_i|c) from our training data is also simple: It is overall frequency of word w_i in all documents with class c.
 
 ![alt text](image-4.png)
+
+
