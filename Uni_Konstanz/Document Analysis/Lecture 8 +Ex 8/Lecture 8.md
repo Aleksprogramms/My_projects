@@ -83,3 +83,5 @@ Computing the individual p(w_i|c) from our training data is also simple: It is o
 ![alt text](image-4.png)
 
 
+  
+  
