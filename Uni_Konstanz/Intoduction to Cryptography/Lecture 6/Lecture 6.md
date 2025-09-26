@@ -101,3 +101,18 @@ Constuct a MAC П'= (KGen, Mac', Vrfy) for arbitary-length messages as follows:
 - Vrfy': on input a key (k,s), a message m ∈ {0,1}*, and a tag t, output 1 if and only if vrfy_k(H^s(m), t) = 1
 
 If П is a secure MAC for messages of length l(n) and H is collision resistant, then Construction 6.5 is a secure MAC (for arbitary-length messages)
+
+## HMAC
+
+One can instantiate the Hash-and-MAC approach with the fixed-length MAC from Chapter 4 (Construction 4.5) with an arbitary hash function
+
+However, there are two downsides:
+
+1. It requires two primitives: a hash function and a block cipher 
+-> think of constrained devices, where the implementation of cryptographic schemes should be as small as possible
+2. The more fundamental problem: trere is often a mismatch between the output length of a hash function (>= 256) and the block length of block ciphers(typically 128)
+
+The problems led to the development of HMAC
+-> a MAC that can be based on any hash function constructed using the Merkle-Damgard transform applied to a compression function
+
+![alt text](image-3.png)
