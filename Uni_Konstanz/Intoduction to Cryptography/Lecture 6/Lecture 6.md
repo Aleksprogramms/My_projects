@@ -116,3 +116,5 @@ The problems led to the development of HMAC
 -> a MAC that can be based on any hash function constructed using the Merkle-Damgard transform applied to a compression function
 
 ![alt text](image-3.png)
+
+#  211
