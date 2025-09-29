@@ -145,3 +145,194 @@ NP → NP → PP → ADVP → VP → NP → NP
 - Typed dependency path 
 
 Airlines <- [ subj ] matched <- [ comp ] said [ subj ] -> Wagner
+
+
+## Neural Language Models for Relation Extraction
+
+Pre-trained contextual language models can be used to build relation extraction pipelines by leveraging what the model has learned about word relations(e.g. via attention):
+
+- This is transfer learning. The model is
+    - Trained on an unsupervised task, and
+    - fine-tuned for relation extraction.
+
+- Adaptation of an annotation task:
+    - Given a sentence with masked entites, the model is trained to label tokens with relation types.
+
+- Adaptation of extractive question answering:
+    - Given a sentence and the question "how are entites A and B related", the model outputs begin and end tokens indices of th relation in the sentence.
+
+## Supervised Relation Extraction in a Nutshell
+
+Advantages:
+
+- We can obtain high accuracy (both precision and recall) as long as we have sufficient labeled data
+
+Disadvanteges:
+
+- Data hungry: requires a lot of labeled training data 
+- Often poor perfomance when adapting from one to  domain to another (but transfer learning techniques can be helpful)
+
+# Sentiment Analysis
+
+Sentiment Analysis:
+
+Broadly speaking, sentiment analysis describes the tasks of identifying, extracting, quantifying, and studying affective states of the authors and expressed subjective information in text.
+
+Example: positive and negative movie reviews
+
+![alt text](image-1.png)
+
+## Sentiment Analysis Applications
+
+Some applications of sentiment analysis:
+
+- Movies: is this review posititve or negative?
+- Products: what do people think about the new Iphone?
+- Public sentiment: how is consumer confidence?
+- Politics: what do people think about this candiate or issue?
+- Prediction: predict election outcomes or market trends from sentiment
+- Feedback: mine user feddback for suggestions or critism
+- etc.
+
+## Sentiment Analysis and Related Tasks
+
+The definition of sentiment analysis is often vague.
+
+Alternative names:
+
+- Opinion extraction
+- Opinion mining
+- Sentiment mining
+- Subjectivity analysis
+- ...
+
+Related detection / classification tasks:
+
+- Subjectivity
+- Bias
+- Stance
+- Hate-speech
+- Sarcasm
+- Deception and betrayal
+- Online trolling
+- Polarization
+- Politeness
+- Linguisitic alignment
+- ...
+
+## Schrer Typology of Affective States
+
+Emotion: brief organically synchronized [...] evaluation of major event
+- angry, sad, joyful, fearful....
+Mood: diffuse non-caused low-intensity long-duration change in subjective feeling
+- cheerful, gloomy, irritable....
+Interpersonal stances: affective stance toward another person in a specific interaction
+- friendly, flirtatious, distant, cold...
+Attitudes: enduring, affectively colored beliefs, dispositions towards objects or persons
+- liking, loving, hating, valuing, desiring...
+Personality traits: stable personality dispositions and typical behavior tendencies
+- nervous, anxious, reckless, morose...
+
+## Sentiment Analysis: method Overview
+
+Sentiment analysis is the detection of attitudes:
+
+- Who is the holder of the attitude
+- Who is the target of the attitude
+- What is type of attitude?
+    Type of attitude:
+    - From a set of types Like, love, hate, value, desire, etc.
+    - More commonly: simple weighed polarity: positive, negative, neutral (together with strength)
+
+- Text containing the attitude
+    - Sentence, paragraph, or document
+
+## Constructing a Sentiment Classifier
+
+For sentiment classification, most classifiers can be used. As usual, the art lies in selecting and extracting good features and addressing challenges.
+
+Challenges in extraction of features include:
+
+- Tokenization
+- Stemming
+- Negation
+- Subtleties (or: the limits of features that do not capture semantics)
+
+## Sentiment Features: Tokenization
+
+Punctuation is typically removed or collapsed in preprocessing. But for sentiment analysis, it may contain valuable signals.
+
+- Repetition of punctuation for emphasis
+    An amazing movie. vs. An amazing movie !1!!
+- Masked of expletives
+    i %^&*ing hate data cleaning!
+- Emotions are mostly punctuation, but may carry more sentiment signal than most words.
+
+## Sentiment Features: Stemming
+
+Stemmers heuristically identify word suffixes and strip them, with some regularization of the endings. This runs the risk of merging tokens with positive or negative connotation.
+
+![alt text](image-2.png)
+
+Stemming can be helpful for pooling the signal, but choose the stemmer with caution!
+
+## Sentiment features: Negation
+
+Negation reverses the polarity of certain words:
+
+- This movie was good vs. this movie was not good
+- I recommend this product vs. I do not recommend this product
+
+Wordaround: Simple neagtion marking,
+
+We append a _NEG suffix to every word that occurs between a negation and the next punctuation mark at the level of the current clause.
+
+This movie was not good, but the popcorn was great.
+This movie was not good_NOT, but the popcorn was great.
+I do not recommend this product.
+I do not recommend_NOT this_NOT product_NOT.
+
+Drawback: The vocabulary size just doubled...
+
+Sentiment Lexica
+
+Some words or phrases can be clearly identified as carriers of a strong sentiment signal:
+
+- Positive: beautiful, wonderful, good, amazing...
+- Negative: bad, poor, terrible, cost someone an arm and a leg(idiom)
+- Context dependent: long charging time vs. long battery lifespan
+
+List of such words are instrumental resources for sentiment analysis and opinion mining.
+They are typically compiled
+- manually in a dictionary, or
+- automatically from a corpus.
+
+## Sentimaent Lexica Resources
+
+MPQA subjectivity Cues Lexicon
+- 6,885 words from 8,221 lemmas
+    - 2,718 positive
+    - 4,912 negative
+
+- Each word annotated for intensity (strong, weak)
+- published under GNU GPL
+
+SentiWordNet
+
+- Extension of WordNet with sentiment valuse. All synsets automatically annotated for degrees of positivity, negativity, and objectiveness
+- [estimable (J, 3)] may be computed or estimated Pos 0, Neg 0, Obj 1
+- [estimable (J, 1)] deserving of respect Pos 0.75, Neg 0, Obj 0.25
+
+## Sentiment Analysis with Neural Language Models
+
+of course, pre-trained contextual language models can be fine-tuned for sentiment analysis:
+
+- This is transfer learning. The model is
+    - trained on an unsupervised task, and
+    - fine-tuned for sentiment analysis.
+- Adaptation of a classification task:
+    - Given a sentence dtermine to which sentiment class it belongs.
+- Adapatation of a regression task:
+    - Given a sentence output a sentiment score.
+
+    
