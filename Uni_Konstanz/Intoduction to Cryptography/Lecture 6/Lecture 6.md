@@ -117,4 +117,181 @@ The problems led to the development of HMAC
 
 ![alt text](image-3.png)
 
-#  211
+Let (KGen_H, H) be a hash function constructed by applying the Merkle-Damgard transform to a compression function (KGen_h, h) that takes input of length n + n' > 2n + log n + 2 and generates outputs of length n. Fix distinct constants opad, ipad ∈ {0 ,1} ^n'. Define a MAC as follows:
+
+- KGen': on input 1^n run KGen_H(1^n) to obtain a key s. Also choose a uniform k ∈ {0 ,1} ^ (n'). Output the key (s,k).
+- Mac' : on input a key(s, k) and a message m ∈ {0,1}*, output 
+
+    ![alt text](image-4.png)
+- Vrfy': on input a key (s,k), a message m ∈ {0, 1}*, and a tag t, output 1 if and only if t = ![alt text](image-5.png)
+
+HMAC can be viewed as an instantiation of Hash-and-MAC:
+
+- Inner hash corresponds to the hash function, hashing , to fixed-length m -> we ciew k_in as the IV for the hash function
+- Outer hash corresponds to a fixed-length MAC ![alt text](image-6.png), where ![alt text](image-7.png)
+
+We need "computational independence" of ![alt text](image-8.png). 
+
+Define ![alt text](image-9.png)
+
+Assume G^s is a pseudorandom generation П^s is a secure fixed-length MAC for messages of length n', and (KGEn_H, h) is collision resistant. Then HMAC is a secure MAC (for arbitary-length messages)
+
+Why bother with k_in in the first place?
+
+-> Hash-and-MAC requires the hash to be collision resistant which does not require a secret key
+
+By including the key in the inner hash, HMAC can be proven secure using the assumption that the hash function is only weakly collision resistant.
+-> informally, an attacker needs to find a collision for a secretly keyed hash function
+-> this is a weaker assumption and potentially easier to achive
+
+Advantage of this design stratefy: when the hash function MD5 was discovered to be not collision resistant, HMAC-MD5 was not affected as the attack did not break weak collisiom resistance of MD5
+-> nevertheless, HMAC-MD5 should no longer be used due to weaknesses in MD5
+
+# Generic Attacks on Hash Functions
+
+The birthday problem 
+
+if q people are in room, what is the probability that two of them share the same birthday?
+
+A more specific question:
+
+How many people do you need in a room, such that with a probability of at least 50%, two of them share the same birthday?
+
+-> 23 people are required
+-> with 70 people, the probability is 99.97%
+
+Recall: brute-force attacks
+
+-> attacks that apply to any scheme
+-> for symmetric-key primitives: an attacker can enumerate all 2^n keys to find the right one
+-> if we want to achieve security against attackers running in time 2^n, we need keys of length at least n.
+
+What are brute-force attacks for hash functions?
+
+-> Disclaimer: using a birthday attack(related to the bitthday problem), we can show that for any hash function with l-bi output, one can find collisions in time ~ 2^(l/2)
+-> we need twice the length of secret keys to achieve comparable security
+
+Let H: {0,1}* -> {0,1}^l be a hash function
+
+By the pigeonhole principle: evaluating q = 2^l + 1 distinct inputs guarantees a collision 
+-> trivial collision attack in time O(2^l)
+
+Generakization using parameter q:
+
+1. pick q distinct inputs x1,...,x_q
+2. Compute outputs y1,...,y_q as y_i := H(x_i)
+3. check if any of the {y_i} are equal
+
+From the above we know that a collision is guaranteed if q > 2^l
+
+Now the above we know that a collision is guaranteed if q <= 2^l
+-> Collisions are no longer guaranteed 
+-> Collisions have clearly a nonzero probability
+
+
+Problem: hard to analyze when H is arbitary
+
+Workaround: we treat H as a random function
+-> for each i, we assume that y_i is uniform and independent from the other values {y_j}_j != i (recall that the {x_j} are distinct)
+-> this is the worst case (collisions are more likely when H is more biased)
+
+We can now rephrase our question as follows:
+
+if we generate uniform y1,..., y_q ∈ {0, 1}^ℓ, what is the probability that three exist distinct i,j with y_i = y_j?
+
+This is the birthday problem
+-> Evaluating q = O(2^(l/2)) hash inputs yields a collsion with probability ~ 1/2
+
+When using 129-bit keys for symmetric encryption, we need at least 256-bit hash outputs to achieve the same level of security
+-> note that this is a necessary condition, not a sufficient one
+
+What about meaningful collisions? (So far we picked the inputs x_i randomly)
+
+Assume Alice wants to find two messages x and x' such that H(x) = H(x'), where x should be a negative letter (why she was fired) while x' should be a flattering letter of recommendation
+-> if  the employer authenticates x, Alice can create a forgery for x'
+
+Alice can perform a birthday attack by generating q = O(2^(l/2)) messages of the first type and messages of he second type, followed by looking for collisions between the two (which again happens with probagbility roughly 1/2)
+-> note that the birthday attack requires the inputs to be distinct but not random
+
+How to generate so many messages? Synonyms!
+
+It is hard/difficult/challenging/impossible to imagine/believe that we will find/locate/hire another employee/person having similar abilities/skills/character as Alice. She has done a great/super job.
+
+The above sentences can be written in 4 * 2 * 3 * 2 * 3 * 2 = 288 different ways, all the same meaning
+
+Having a text with 64 words with one synonym each, we get 2 ^ 64 variants of the same text
+
+# The Random-Oracle Model
+
+There are many exapmles of constructions that cannot be proven secure based on the collision resistance of hash functions
+
+In many cases it appears that there is no simple and reasonable assumption regarding the hash function that is sufficient
+
+What to do in this case?
+
+- Look for schemes that can be proven secure under reasonable assumptions
+-> good approach, but what until such construction are found
+-> these construction are typically less efficient
+
+- Use cryptosystems that have no justification than unsuccesful attacks
+-> goes agains everything we have talked so far
+
+- The "middle ground" approach: introduce idealized models
+-> A popular example is the random-oracle model
+
+In the random-oracle model, there exists a publicm random function RO-called a random oracle-to which everyone has access
+
+This function can only be evaluated by "querying" the oracle
+
+No one claims that random oracle exist; the random-oracle model is a methodolgy used to design and validate cryptographic schemes:
+
+1. A scheme is designed adn proven secure in the random-oracle model
+-> security experiment is enhanced by a random oracle to which everyone (experiment itself, adversary, and reduction) have access to
+2. To use the scheme in the real world (where do not have random oracles), one instantiates RO with an appropriately designed cryptographic hash function H. This means that each time a party should query the random oracle on input x, the party instead computes H(x) on its own
+
+The idea: if the hash function in the second step is "sufficiently good" at emulating a random oracle, the security proof from the first step will carry over to the real-workd instantiation
+
+Three properties of security proofs in the random-oracle model: 
+
+1. if x has not been queries to RO, thrn the value of RO(x) is uniform
+2. If A queries x to RO, the reduction can see this query and learn x -> this is called "extractability"
+3. The reduction can set the value of RO(x) (i.e., the responce to query x) to a value of its choice, as long as this value is correctly distrivuted, i.e., uniform -> this is called "programmability"
+
+The first property might looks very similar to the guarantees of a pseudorandim generator, but it is actually much stronger
+
+- G(x) is pseudorandom as long as x uniform and completely unknown to A
+- RO(x) is truly uniform as long as x has not been queried
+- Assume that x is an n-bit string and that the first half is known:
+    - G(x) might be easy to distinguish from random
+    - RO(x) looks still random
+
+## Simple Illustration of the random-oracle Model
+
+Let RO: {0,1}^(l_in) -> {0,1}^(l_out) be a random oracle, where l_in, l_out > n (the security parameter)
+
+It is easy to constuct a pseudorandom function in the random-oracle model
+
+Suppose l_in(n) = 2n and l_out(n) = n, and define F_k(x) = RO(k||x), where |k| = |x| = n
+
+One can show that any PPT A succeeds in the following experiment with probability at most 1/2 + negl (n):
+
+1. A function RO and values k ∈ {0, 1}^n and b ∈ {0, 1} are chosen uniformly.
+2. If b = 0, the adversary A is given access to an oracle for F_k(·) = RO(k||·). IF b = 1, then A is given access to a random function mapping g-bit inputs to n-bit outputs. (This randim function is independent of RO.)
+
+3. A outputs a bit b', and succeeds if b' = b
+
+![alt text](image-10.png)
+
+Advantages and disadvantages of the random-oracle model
+
+Disadvantages:
+
+- There is no such thing as a public function that "is random"
+- There are known counterexamples
+
+Advantages:
+
+- No example of a "natural" scheme secure in the random-oracle model being attacked in the real world
+- If an attack is found, simply replace the hash function
+- A proof in the random-oracle model is better than no proof at all
+-> provides evidence that design principle is sound
