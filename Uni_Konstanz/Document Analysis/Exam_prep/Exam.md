@@ -216,7 +216,7 @@ Tag Set
 - Tag sets are defined by linguists and not unambigous
 - Different languages require different language-specific tag sets-> it is difficult to compare tags between different languages
 
-## Feature-based Tagging
+## Feature-based Tagging[-]
 
 Probabilistic methods 
 
@@ -236,7 +236,7 @@ Rule-based methods
 - Rules are easy to interpret
 - Each language needs its own rules
 
-## Unigram tager
+## Unigram tagger[++]
 
 How it works?
 
@@ -246,7 +246,7 @@ How it works?
 
 Problem: the most frequent tag is obviously not always correct! we need to know in which sense that is being used. We need to take the context into account.
 
-## N-grams POS tagger
+## N-grams POS tagger[++]
 
 Core idea:
 
@@ -269,7 +269,7 @@ Backoff: Combining Multiple Taggers
 Important note:
 Bigram and trigram taggers need the previous tag context to assign new tags. If they see a [ na ] tag in the previous context, they will also print [ na ]. -> Error propagation
 
-## Rule-based Tagging
+## Rule-based Tagging[+]
 
 The Brill Tagger 
 
@@ -284,4 +284,102 @@ An example of transformation-based learning
 - Very popular
 - The rules are linguistically interpretable
 - It is a supervies method and therefore require a tagged corpus
+
+Process:
+
+Intialization: 
+
+- Tag each word with the most likely POS (as observed in corpus)
+- For words that are not in the corpus
+    - If it os capitalized: label as noun
+    - For token that end in the same three letters as a word with known tag: use the tag of the known word(e.g., labeling[VBG])
+
+Patching:
+- Find suitable instances and apply patches to improve the result
+- Example of patch:
+    - If one of the two preceding words is tagged as a determiner, change the tag tokens that are tagged as a verb to noun
+
+# Parsing
+
+## Formal grammar [-]
+
+A formal grammar G = (N, T, P, S) provides a scheme for generating a formal language, if consists of:
+
+- A finite set of non-terminal symbols N (constituents)
+- A finite set of terminal symbols T(words)
+- A start symbol S (a sentence)
+- A finite set of production rules P of the form: left hand side -> right hand side
+
+The grammar's language L(G) is the set of all sequneces of terminal symbols that can be generated with the grammar. To generate a sentence from the language:
+
+- Beginning with the start symbol, consecutively apply rules("derivation")
+- Applying a rule replaces all symbols on the left hand side with the right hand side.
+- Once any termianl symbols remain, the derivation is complete.
+
+## Chomsky normal form[+]
+
+Four types of languages:
+
+- Type-0: Recursively enumerable languages
+    - Rules have the form γ → α (no constraints)
+- Type-1: Context-sensitive languages
+    - Rules have the form: αAβ → αγβ
+- Type-2: context-free languages
+    - Rules have the form: A -> α
+- Type-3: Regular languages
+    - Rules have the form: A -> a or A -> aB
+
+WhereL
+a is a terminal symbol. \
+A,B are non-terminal symbols. \
+α, β, γ are arbitary sequences of terminal / non-terminal symbols. \
+α and β maybe empty. γ cannot be empty. \
+
+A context-free grammar (GCF), is said to be in Chomsky normal form if all of its production rules are in one of the following three forms:
+
+- A -> BC
+- A -> a
+- S -> ε
+
+Where:
+
+- A,B,C are nonterminal symbols
+- a is a terminal symbol
+- S is the start symbol
+- ε denotes the empty string
+- Neither B nor C can be S
+
+## Phrase structure [+]
+
+Constituency
+
+Phrase sturcture organizes words into nested constituents. But what is a constituent?
+
+- A word or a group of words that function as a single unit withtin a hierarchial structure.
+- A constituent behaves as a unit that can appear in different places.
+
+Example:
+
+
+Mr. Mackey talked [to the children] [about drugs].
+Mr. Mackey talked [about drugs] [to the children].
+*Mr. Mackey talked drugs about to the children.
+
+A* in examples typically denotes ungrammatical or unobserved sentences.
+
+Consider how we can generate sentences (S):
+
+- A simple grammar for a single sentence: e.g., "Birds fly"
+
+    - S -> NN VB
+    - NN -> birds | planes | superheroes
+    - VB -> fly | sing | fall
+- Other sample sentences : "Birds sing", "Superheroes fly", etc.
+
+Limitation: In the above examples, verbs are intransitive (they do not have a direct object)
+
+- Example: superheroes save [who|what]
+- We need transitive verbs and direct objects
+- We need determiners, e.g. "the mayor", "the day"
+
 
