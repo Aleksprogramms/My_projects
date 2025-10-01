@@ -464,3 +464,122 @@ Downside:
 ![alt text](image-4.png)
 
 ![alt text](image-5.png)
+
+## Statistical parsing [-]
+
+How can we resolve ambigous parse trees?
+
+Core idea:
+
+- Use a grammar that attaches a probaility to a production rule: probabilistic context free grammar (PCFG)
+- All probabilities p of identical left hand side symbols in rules must sum up to 1
+- The probability of a parse tree is the product of all used production rules
+- Probabilities can be learned from a lebeled training corpus(treebank): p (S -> NP VP) = count (S -> NP VP) / count (S)
+
+## Lexicalized Parsing [-]
+
+Using corpus statistics, we can go even further and construct a parse that takes lexical relations into account to compute probabilities.
+
+Core idea: 
+
+- we dont just check the probability of rules, e.g. VP -> VP PP
+- Instead, we also check the Probabilities of terminals, e.g. VP[ate] -> VP[ate] PP [with]
+- We can better model whether a specific PP belongs to a VP or NP
+
+![alt text](image-6.png)
+
+## Dependency parsing [--]
+
+Dependency grammar assumes that syntactic structure consists only of dependencies between tokens,
+
+- Dependencies are (labeled) asymmetric binary between two token
+- Dependencies typically from a tree with a single head (the root)
+
+![alt text](image-7.png)
+
+Dependency parsing vs. Constituency parsing
+
+Dependency parsing:
+
+- Models natural language via a dependency grammar
+- Create linguistic structure from the dependencies of tokens
+- Useful when we are interested in relations between words
+
+Constituency parsing:
+
+- Models natural language as a context free grammar
+- Breaks text down into a phrase structure (constituents)
+- Constructs the syntactic structure from constituents
+- Useful when we are interested in phrases
+
+
+# Named Enity Recognition and Linking 
+
+## Events [--]
+
+The 5 Ws of Journalism
+
+Who was involved? What happend? When did it happen? Where did it happen? Why did it happen?
+
+## Named Entity types[-]
+
+Common types of named Entities
+
+The core set:
+
+- Persons
+- Locations
+- Organizations
+
+Further useful named entity types:
+
+- Dates
+- Times
+- Numeric expressions
+
+Domain-specific entity types:
+
+- Chemicals
+- Genes
+- Stock symbols
+- Laws 
+- URLs
+- etc
+
+## The NER Task [++]
+
+Goal:
+
+- identify named entities in a document and tag them with a type.
+
+Applications:
+
+- Named entity in a text can be indexed, linked to external databases, etc
+- Sentiment can be attributed to companies or products
+- Identify relations between named entites
+- In question answering: answers are often named entities
+- Google knowledge graphs answers
+- etc...
+
+## Sequence Labeling for NER[+]
+
+via Machine Learning
+
+Training:
+
+1. Collect set of representative training documents
+2. Manually label each token for its entity class (PER, LOC, ORG, etc.) or other (O)
+3. Design appropriate feature extractors for the text and classes
+4. Train a sequence classifier to predict the labels from the data
+
+Testing / Classification:
+
+- For a set of new. unlabeled input documents:
+    - Run the sequence model in inference mode to label each token
+    - Output the recognized entities
+
+In practice:
+
+- Inside-Outside (IO) encoding is less precise
+- Inside-Outside-Begging(IOB) encoding is more precise but requires a larger tagset (2c + 1 classes vs, c+ 1 classes in IO encoding)
+- But: the benefit is limited in practice, so IO is often used
