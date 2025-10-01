@@ -382,4 +382,85 @@ Limitation: In the above examples, verbs are intransitive (they do not have a di
 - We need transitive verbs and direct objects
 - We need determiners, e.g. "the mayor", "the day"
 
+## Syntactic ambiguity [+]
 
+Syntactic ambiguities can result in semantically different but syntactiacally correct tree structures:
+
+- prepositional phrase attachment: The boy saw the woman with the telescope
+- coordination scope: small boys and girls are playing
+- Particals vs. prepositions: she ran up a large bill
+- Gerund vs. adjectives: Frigthening kids can cause troubles.
+
+![alt text](image-1.png)
+
+## Constituency parsing [++]
+
+a parse tree (or derivation tree) is an ordered rooted tree that graphically represents the syntactic information of a string derived from a (context-free) grammar. There are twoo different approaches to generate a parse tree.
+
+Top-down approach:
+
+- Starts with the starting symbol S
+- Iteratively moves down towards tree leaves using production ru;es
+- Problem: Explores options that won't lead to a full parse
+
+Bottom-up approach
+
+- Starts from tree-leaves (= tokens)
+- Proceeds upward to the root (= the starting symbol S)
+- Problem: Explores options that don't match the full sentence(-> backtracking)
+
+## Leftmost Derivation[+]
+
+Leftmost derivation is not a specific algorithm, but rather a class of Algorithms (further reading: see "LL parsers"). It is designed for restricted context free grammars (e.g., programming languages) and does not work perfectly on natural language.
+
+Leftmost derivation is an example of top-down parsing
+
+Algorithm outline:
+
+- Starts with S
+- In each step, apply a production rule to the leftmost non-termial symbol
+- Produce the observed terminal symbols (= tokens)
+- Terminates once all observed words have been created.
+Example: 
+- S
+- [S -> NP VP]
+- [NP - > DT NN] VP
+- [DT -> The] NN VP
+- The [NN -> apple] VP
+- The apple [VP -> ...]
+
+![alt text](image-2.png)
+
+## Shift Reduce Parser[++]
+
+A shift reduce parser is effectively a pushdown automaton that uses a stack of recognizing a context free language. It is an example of bottom-up parsing
+
+Algorithm outline:
+
+- SHIFT operation: Push a word from the input sentence onto the stack
+- REDUCE operation: if the top n words on the top of the stack match the right hand side of a production rule, then they are popped and replaced by the left hand side of the production.
+- STOPPING condition: The process stops when the input has been processed and S have been popped from the stack
+
+![alt text](image-3.png)
+
+## CKY parser[+]
+
+The Cocke-Kasami-Younger parser uses dynamic programming. it is an example of a bottom-up parser.
+
+Core idea:
+
+- Cache indermediate results
+- For building a parse for a sequence [i,j], keep track of all parser of subsequences [i,k] and [k,j] that are included in it (i <= k <= j).
+
+Advantage:
+
+- Backtracking: if the parser gets stuck, we can easily go back to a previous alternative
+
+Downside:
+
+- Required a binarized grammar
+- The grammar must be in Chomsky Normal Form
+
+![alt text](image-4.png)
+
+![alt text](image-5.png)
