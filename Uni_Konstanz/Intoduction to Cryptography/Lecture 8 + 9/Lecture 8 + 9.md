@@ -145,3 +145,143 @@ Examples:
 A set may be a group under one operation, but not another. For example Z is an abelian group under addition (identity is 0 and every integer g has inverse -g); On the other hand, Z is not a group under multiplication (integer 2 has no inverse in the integers).
 
 The set of real Numbers R is not a group under multiplication (0 has multiplicative inverse). The set of nonzero real number, however, is an abelian group under multiplication with identity 1.
+
+
+Let N > 1 be an integer. The set {0, ..., N - 1} with respect to addition modulo N (i.e. where a + b = [a + b mod N]) is an abelian group of order N.
+
+Closure is obvious: associativity and commutativity follow them from the fact that the integers satisfy these properties; the identity is 0; and, since a + (N - a) = 0 mod N, it follows that the inverse of any element a is [(N - a) mod N]
+
+We denote this group by Z_w. (We will also sometimes use Z_w to denote the set {0, ..., N - 1} without regard to any particullar froup operation.)
+
+### Group Exponentiation
+
+Often useful to describe the group operation applied m times to a fixed element g
+
+When using additive notation, we write
+
+mg = m * g  = g + ...(m times)... + g
+
+-> note that here m is an integer and g is a group element
+-> the notation "behaves as it should", e.g. if g ∈ G and m, m' ∈ Z, then (mg) + (m'g) = (m + m')g, m (m'g) = (mm')g, and 1 * g = g
+
+when using multiplicative notion, we write
+
+g^m = g...(m times)...g
+
+-> fimilar rules of exponentiation hold: ![alt text](image-1.png)
+
+When using additive notation, we define
+- 0 * g = 0
+-> note that the left 0 is an integer while right 0 is the identity of the group
+
+- (-m) * g = m * (-g)
+-> Here, -g is the inverse of g and (-m)g = -(mg)
+
+When using multiplicative notation, we define
+
+![alt text](image-2.png)
+#### Corollary 9.15
+Let G be a finite group with m = |G|, the order of the group. Then for any element g ∈ G, it holds that g^m = 1
+
+Let G be a finite group with m = |G| > 1. Then for any g ∈ G and any integer x, we have g ^ x = g ^ [x mod m]
+
+Written additively, Corollary 9.15 says that if g is an element in a group of order m, then x * g = [x mod m] * g.
+
+As an example, consider the group Z_15 of order m = 15 and g = 11. 
+
+152 * 11 = [152 mod 15] * 11 = 2 * 11 = 11 + 11 = 22 = 7 mod 15
+
+#### Corollary 9.17
+
+A useful corollary for cryptographic applications:
+
+Let G be a finite group with m = |G| > 1. Let e > 0 be an integer, and define the function f_e: G -> G by f_e(g) = g ^ e. If gcd(e,,m) = 1, then f_e is a permuutation (i.e., a bijection). Moreover,, if d = e ^ (-1) mod m then f_d is the inverse of f_e.
+
+The set Z_N = {0, ..., N - 1} is a group under addition modulo N
+
+Next, we define a group with respect to multiplication modulo N
+
+-> we have to eliminate all elements that are not invertible 
+-> 0 has no multiplicative inverse and needs to be eliminated
+-> Nonzero element might also not be invertible
+
+the invertible elements b ∈ {1, ..., N - 1} satisfy gcd(b, N) = 1
+
+Hence, the set 
+
+![alt text](image-3.png)
+
+consists of the integers that are relatively prime to N
+
+Let N > 1 be an integer. Then ![alt text](image-4.png) is an abelian group under multiplication modulo N.
+
+The group ![alt text](image-5.png)
+
+define ϕ(N) = |![alt text](image-5.png)| (Euler phi function); what is the value of ϕ(N) (order of ![alt text](image-5.png))?
+
+First case: N = p is prime
+
+-> All elements in {1, ..., p-1} are relatively prime to p, hence ![alt text](image-6.png)
+
+Second case: N = pq, where p and q are distinct primes
+
+-> if a ∈ {1, ..., N - 1} is not relatively prime to N, then either p | a or q | a
+-> There are q - 1 elements divisible by p: p, 2p, ..., (q-1)p
+-> There are p - 1 elements divisible by q: q, 2q, ..., (p-1)q
+-> Thus, the remaining elements (neither divisible by p nor q) are
+
+(N - 1) - (q - 1) - (p - 1) = pq - p - q + 1 = (p - 1)(q - 1)
+
+-> ϕ(N) = (p - 1)(q - 1)
+
+The general result:
+
+![alt text](image-7.png)
+
+Take N = 15 = 5 * 3. Then Z*_15 ={1,2,4,7,8,11,13,14} and |Z *_15| = 8 = 4 * 2 = ϕ(15). The inverse of 8 in Z *_15 is 2, since 8 * 2 = 16 = 1 mod 15
+
+The following two results follown from Theorem 9.14 and Corollary 9.17:
+
+![alt text](image-8.png)
+
+![alt text](image-9.png)
+
+# Primes, Factoring, and RSA 
+
+One fundamental problem from number theory that is conjectured to be hard: integer factorization or simply factoring:
+
+- Given a composite integer N, find p, q > 1 such that N = pq
+
+The problem can solved in exponential time ![alt text](image-10.png) via trial division:
+
+- Check if p divides N for p  = 2, ..., ![alt text](image-11.png)
+- sqrt(N) many division, each taking polygon(N) = |N|^c time for some constant c
+- While the largest factor can be as N / 2, the smallest factor can be at most ![alt text](image-12.png)
+
+As of today, no polynomial - time (classical) algorithm for factoring exists
+-> Shor's algorithm solves factoring in polynomail-time on a quantum computer
+
+The weak factoring experimatn w-Factor_A(n):
+1. Choose two uniform n-bit integers x1, x2.
+2. Compute N = x1 * x2.
+3. A is given N, and outputs x1', x2' > 1.
+4. The output of the experiment is defined to be 1 if x1' * x2' = N, and 0 otherwise.
+
+Given that factoring as assumed to be hard, does this imply that Pr[w-Factor_A (n) = 1] for any PPT A?
+-> No
+
+With probability 3/4, N will be even (occurs when either x1 or x2 is even); in this case, A can output x'1 = 2 and x'2 = N / 2
+
+Factoring is hard for numbers that have only large factors
+-> we need to refine the experiment such that x1 and x2 are n-bit primes rather than integers
+-> for this, we need to efficiently generate primes, which is the next topic
+
+The distribution of primes
+
+The prime number theorem gives a fairly precise bound on the fraction of primes
+
+For any n > 1, the factoring of n-bit integers that are prime is at least 1/3^n.
+
+if we set t = 3n^2, the probability that Algorithm 3.21 never chooses a prime ()
+
+## 284
