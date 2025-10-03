@@ -583,3 +583,338 @@ In practice:
 - Inside-Outside (IO) encoding is less precise
 - Inside-Outside-Begging(IOB) encoding is more precise but requires a larger tagset (2c + 1 classes vs, c+ 1 classes in IO encoding)
 - But: the benefit is limited in practice, so IO is often used
+
+## Features for NER[+]
+
+Token-level features
+
+- Current token
+    - Effectively, this is dictionary learning
+    - Example: Barbara is typically (part of) a name
+- Previous/ next word (token)
+
+Tag-level features
+
+- Inferred linguistic classification (e.g. POS tags)
+
+Label-level features:
+
+- Previous (and perhaps next) named entity label in the current sequence
+- Example: Jon [PER] Snow [PER]
+
+Many types of named entities have characteristics name structures in which substrings increase the likelihood for a certain type of entity:
+
+- Substring "oxa" in drug names
+
+- Substring field in location names
+
+- Special characters like a colon(:) in movie titles
+
+Some named entity names tend to follow patterns that can be mapped to a simplified representation based on attributes such as:
+
+- Token length
+- Capitalization
+- Numerals
+- Greek letter
+- Internal punctuation
+- etc. 
+
+## Named entity disambiguation[+]
+
+Named entity ambiguity - The Tesla chief executive.... Who? Company? Person? Unit?
+
+Normalization: Reducing or rewriting something to a common (normal) form. Example:
+
+- Mathematics: normalizing a fraction
+    - 1 / 2 = 2 / 4
+
+- Mathematics: normalizing a vector to unit length
+    - v' = v / |v|
+
+- Formal grammars:
+    - Chomsky Normal Form for CFGs
+
+- Databases:
+    - 1NF, 2NF, 3NF, EKNF, etc.
+
+- Person names:
+    - Donald Trump, also known as: Donald J. Trump, POTUS, 45-47, President Trump...
+
+## Named Entity Linking [+]
+
+How can we match entity mentions in a text to identities in a knowledge base? This is often modeled as a ML prediction task: Given an entity mention in a text, predict the most likely corresponding entity in a knowledge base.
+
+Core steps:
+    - Mention detection (= named entity recognition)
+    - Candidate generation (= string matching to knowledge base entries)
+    - Candidate ranking using features:
+        - Context features: tokens around the entity ,entions
+        - Knowldege graph structural features (e.g. graph centratility)
+        - Unambiguous entity mentions in the context
+        - Heuristic features (e.g., overall popularity of an entity)
+
+Drawbacks:
+
+- Engineering the strcuture of a knowledge graph(an ontology) is difficult and subjective, but directly affects how useful it is. 
+
+Examples:
+
+- Places categories in Wikidata: Are they populated places or levels in an organizational hierarchy? 
+- Jesus in Wikidata: A person? God? A prophet? Real or fictional?
+
+
+
+## Normalizing temporal expressions [-]
+
+For temporal expressions, we can use a rule-based normalization tather than tlinking them to a knowldege graph. For example:
+
+January 12, 2022 at 2 pm -> 2022-01-12 14:00 UTC
+
+But different types of temporal expressions require different rules for normalization:
+
+- Absolute temporal expressions:
+    - January 12, 2022; International Worker's day 1997; during the Council of Conctance
+
+- Relative temporal expressions
+    - yesterday; this afternoon; the day before
+
+
+For relative temporal expressions, a reference time is necessary, which requires domain knowledge to retrieve.
+
+News-style texts: Use publicatin metadata
+
+- Elon-Musk revealed on Thursday that...
+- New article published on Saturday, 16.04.2022
+- Thursday -> 2022-04-14
+
+Narrative texts: use preceding information in paragraph
+
+- Keep track of last mentioned date
+- Use as reference for normalization
+
+## NE-based Application:
+
+implicit Network vs. Knowledge graph
+
+![alt text](image-8.png)
+
+Generating Implicit networks from a corpus
+
+![alt text](image-9.png)
+
+implicit Networks: Pipeline Architecture
+
+![alt text](image-10.png)
+
+Extracting implicit entity relations
+
+problem: How can we discover complex relations for a (a set of) entities? Query ⟨Location | Barack Obama, Hillary Clinton⟩
+
+![alt text](image-11.png)
+
+![alt text](image-12.png)
+
+# Similarity and Search
+
+## Types of word similarity[+]
+
+Surface form similarity:
+
+- Phonological similarity (e.g. brake | break)
+- Morphological similarity (e.g. respect | resctful)
+- Spelling similarity (e.g. theater | theather)
+
+Semantic similarity:
+
+- Synonymy (e.g. verbose | wordy)
+- Hypernymy, Hyponymy (e.g. color | red)
+
+Content similarity:
+
+- Sentence similarity (e.g. paraphrases)
+- Document similairy (e.g. two news stories on the same event)
+
+## Phonological similarity[-]
+
+Words with the similar pronunciation are encoded to the same representation so they can be mathced despite minor differences in spelling.
+
+## Soundex algorithm [--]
+
+Idea:
+
+- Turn every tokeninto a 4-character reduced form
+- Build an index on the reduced forms
+- Apply the same encoding to query terms(= tokens in the query)
+- Search the index for phonetically similar tokens that have some encoding
+
+Algorithm:
+
+1. Retain the first character of the word
+2. Replace all occurrences A, E, I, O, U, H, W, Y with digit  0
+3. Characters from the following sets into digits:
+    - 1 <- B,F,P,V
+    - 2 <- C, G, J, K, Q, S, X, Z 
+    - 3 <- D, T
+    - 4 <- L
+    - 5 <- M, N
+    - 6 <- R
+4. If two adjacent digits are identical, remove one of them
+5. Remove all zeros from the string
+6. Return the list four characters of the string (pad with trailing 0s if necessary)
+
+Disadvanteges:
+
+- Language specificness: originaly developed for English
+- Homophonous names starting with a different character
+    - Craft (C613)
+    - Kraft (K613)
+- Unable to discriminate between long words (4-character limit)
+- Conflation of unrelated family names:
+    - Saint (S530)
+    - Sand  (S530)
+    - Snead (S530)
+    - Sunday (S530)
+
+## Morphological similarity [+]
+
+?
+
+## Levenstein distance [++]
+
+Idea benind the Levenstein Distance (also called edit distance): Given two strings s1 and s2, count the minimum number of basic operations to convert one string to the other.
+
+Basic-operations are typically character-level:
+
+- Insert
+- Delete
+- Replace (i.e., subsitute)
+
+Example:
+
+- The edit distance between rain and shine is 3
+- We need to replace two characters and insert one character
+
+Wagner-Fischer Algorithm
+
+Step 1: Setup and parameters
+
+Set n to be the length of string s \
+Set  m to be the length of string t \ 
+If n = 0, return m and exit \
+If m = 0, return n and exit. \
+Construct a matrix containing 0...m rows and 0...n columns. 
+
+Step 2: Initialization
+
+initialize the zeroth row to 0..n \
+initialize the zeroth column to 0..m 
+
+Step 3: iteration
+
+For i from 1 ... m // iterate over rows \
+For j from 1...n // iterate over columns
+
+if s[i] = t[j] then SubCost:= 0 // retain character \
+if s[i] != t[j] then SubCost := 1 // replace character 
+
+d[i,j] := minimum (d[i - 1, j] + 1), // Deletion \
+d[i, j - 1] + 1, // Insertion \
+d[i - 1, j - 1] + subCost) //substitution
+
+return d[m,n]
+
+![alt text](image-13.png)
+
+## Semantic relations [+]
+
+Synonymy: 
+
+- Different words with similar meaning (e.g., big | large)
+- Synonyms differ in their frequency of use and the context
+
+Antonymy:
+
+- Words that are near opposites (e.g., raise | lower)
+
+Hypernymy:
+
+- Supertype of a words (e.g., red is a color)
+
+Hyponymy:
+
+- Subtype of a word (inverse of hypernymy)
+
+Meronymy:
+
+- A word is part of lager whole (e.g. a flock of sheep includes a sheep)
+
+## WordNet[-]
+
+WordNet is a database of words and semantic relations between them. The main relation is hypernymy, so the overall structure is tree-like.
+
+Parent hierarchy of the different meanings of bar:
+
+- Barroom, bar → room → area → structure → artifact ...
+- Bar → counter → table → furniture → ... → artifact ...
+- Bar → implement → instrumentation → artifact ...
+- Bar → musical notation → notation → writing → ...
+
+However:
+
+- Not all words share the same root
+- WordNet has multiple roots
+- WordNet is a forest, not just a tree
+
+In principle, the higher distance the lower the similarity! But there are problems:
+
+- A specific word may not be in any tree
+- Hypernymy edges are not all equally apart in similarity space
+- Many more detailed graph-based semantic similarity measures have been developed
+
+## The vector space model [++]
+
+Boolean retrieval
+
+The simpliest information retrieval system:
+
+- Create an index of all words in the documents
+- Represent queries as Boolean Expressions (Caesar AND Brutus)
+- The retriecal engine returns all documents that match the expression
+- Stemming and Lemmatization can help to improve recall
+
+Indexing and retrieval:
+
+- Create a matrix of the document collection that contains all distinct terms
+- Set the value to 1 if the corresponding document contains the given term
+- Return all documents that have a value of 1 in all cells corresponding to query terms
+
+Scoring for ranked retrieval
+
+But what happens if many documents match?
+
+-> we want to return the documents in an order that is likely to be useful to the searcher
+
+How can we rank (= order) the documents in the collection with respect to a query?
+
+- Assign a score to each document (typically in the range [0,1])
+- The score measures how well the document and the query "match"
+- We need a way to assign (similarity) score to a query/document pair
+
+## TF - IDF [+++]
+
+Term friquency matrix
+
+To have data for a scoring function, term frequency informatoin is helpful:
+
+- We can store term frequency counts instead of binary values in the matrix
+- Each document is now represented by a count vector
+- Note: word order is nor retained in a vector. This approach is called bag of words(BOW)
+
+Term frequency
+
+The term frequency tf_(t,d) of document d is defined as the number of times that t occurs in d.
+
+- A document with 10 occurences if the term Hamlet is more relevant for a query containing Hamlet than a document with just one occurence
+- But probably not 10 times more relevant
+
+-> Relevance does not increase proportionally with term frequency
