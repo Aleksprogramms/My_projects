@@ -918,3 +918,171 @@ The term frequency tf_(t,d) of document d is defined as the number of times that
 - But probably not 10 times more relevant
 
 -> Relevance does not increase proportionally with term frequency
+
+Rarity of Terms
+
+Rare terms:
+
+- Consider a term in the query that is rare in the corpus
+- A document containing this term is very likely to be highly relevant -> We want large positive weights for rare terms.
+
+Frequent terms:
+
+- Consider a term in the query that is frequent in the corpus
+- A document containing this term is more likely to be relevant than a document that does not, but it is less of an indicator of relevance
+
+-> We want positive weights for frequent terms (but lower than for rare terms)
+
+Inverse Document Frequency
+
+The document frequency df_t of term t is defined as number of documents in the corpus which t occurs.
+
+- We can use df_t to account for the rarity of t when computing the matching score
+- The document frequency is an inverse measure of the informativeness of a term -> We need to invert it
+
+The inverse document frequency idf_t is a measure of the informativeness of the term. We define the idf_t weight of term t as:
+
+![alt text](image-14.png)
+
+Where N is the number of documents. We use log N/df_t instead of N/df_t as a heuristic to "dampen" the effect of the inverse document frequency.
+
+Term Frequency-Inverse Document Frequency (TF-IDF)
+
+We combine the term frequency and the inverse document frequency to assign tf-idf weight w to each term t in each document d:
+
+![alt text](image-15.png)
+
+The weight:
+
+- Increase with the number of occurences of a term within a document
+- Increase with the rarity if the term in the collection
+
+Note: We use log-scaling of term frequencies and assume tf_(t,d) > 0 (otherwise, we set w_(t,d)). Other approaches are possible and there is no rigorous formal reasoning behind this choice. In practice, experiments help to determine suitable scaling methods.
+
+TF-IDF weight matrix
+
+![alt text](image-16.png)
+
+Each document is now represented by a real-valued vector of tf-idf weights
+
+- Weights encode frequency information of terms in documents
+- Frequencies of terms in a documents are normalized by the number of documents inwhich the term occurs
+
+## Document Similarity[++]
+
+Documents as vectors
+
+Each document is now represented by a real-valued vector of tf-idf weights
+
+- Terms are dimension (= axes) of the corresponding vector space
+- Document are points or vectors in this space
+- The vector space is very high-dimensional due to vocabulary size: Tens of millions of dimensions when building a search engine at web scale
+- Individual vectors are very sparse: most entries are zero
+
+How is this helpful in quering?
+
+- Idea: Find documents vectors that are similar to the query vector in this space -> Finding close points in a vector space is a well-researched
+
+Measuring Distances in Vector space
+
+Intuitively: Use Euclidean distance between query vector and document vector
+
+- The Euclidean distance between query and document will be large.
+- This is true even if the distribution of terms in the query and the ditribution of terms in the document are very similar
+- Reason: Euclidean distance is large for vectors with mismatching components -> Curse of dimensionality
+
+Curse of dimensionality
+
+Problem:
+- When the dimensionality increases, the volume of the space increases exponentially
+- Word vector spaces have very high dimensionality
+
+Using Angular Similarity
+
+Solution: 
+- Rank documents according to their angular distance from the query
+
+Thought expeiment:
+
+- Take a document d and append it to itself. Call this document d'
+- "Semantically" d and d' have exactly the same content
+- The angle between the two documents is 0°, corresponding to maximal similarity
+- But: the Euclidean distance between d and d' scales with the number of tokens in document d
+
+## Cosine Similarity[+++]
+
+Since cosine is monotonically decreasing function for the interval [0°, 180°], the following two notions are equivalent:
+
+- Ranking documents in decreasing order of the angle between query and document
+= Ranking documents in increasing order of cosine(query, document)
+
+# Language Models
+
+What are language Models[+]
+
+Language model:
+
+A lnaguage model is a probability distribution over sequences of words.
+
+By using a language model, we can assign probabilities to words, given a sequence of other words. That is, we can predict the occurence of words.
+
+![alt text](image-17.png)
+
+Language model examples:
+
+- n-grams
+- Static embeddigns
+    - Word2Vec
+    - GloVe
+    - FastText
+    - etc
+- Contextualized word embeddings
+    - Bert 
+    - Llama
+    - GPT-2/ GPT-3 / GPT-4
+    - DeepSeek R1
+    - Etc.
+
+## Limitations of discrete models of language[+]
+
+A core NLP task: Word similarity
+
+Many applications in text processing and information retrieval rely on word similarity as a core task that needs to be solved
+
+- Spell chekcing
+    - Similarity between individual words
+- Search
+    - Similarity between a sentence and the content of a document
+- Duplicate Detection
+    - Similarity between two documents
+- Summarization
+    - Removal of redudant (= similar) sentences in a document
+- Translation
+    - Finding a similar words in a different language
+
+A similarity between sentences or documents can often be derived from word similarities
+
+Word similarity in manually created models
+
+models like WordNEt are a great resource that can be used to compute word similarities. But:
+
+- WordNet is missing nuance
+- WordNet is missing new meanings of words until they are added
+- WordNet is subjective and biased by the annotators' perspective
+- Requires constant human labor to create and update
+
+One-Hot Vector Encodings
+
+In the vector space model, we are using a localist representation:
+
+- The dimension of the vector space is equal to the vocabulary size
+- Each word (or lemma, or stem) corresponds to exactly on dimension
+- A single word is encoded by a one-hot vector:
+    - All but one vector components an equal to 0 (these components are "cold")
+    - Only the component in the dimension that corresponds to the owrd itself has a value of 1 (the component is "hot")
+- Individual word vectors are othogonal by definition 
+- There is no notion of word similarity in the vector space model
+
+
+
+
