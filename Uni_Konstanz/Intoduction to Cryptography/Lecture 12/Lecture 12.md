@@ -1,4 +1,4 @@
-# Public-Key Encryption
+`# Public-Key Encryption
 
 # Public-Key Encryption - An Overview
 
@@ -120,3 +120,166 @@ Similar to the private-key setting, any CPA-secure scheme also has indistinguish
 
 If public-key encryption scheme П is CPA-secure, then it also has indistinguishable multiple encryptions
 
+Consequence of Theore,e 12.6: a CPA-secure encryption scheme for fixed-length messages implies a public-key encryption scheme for arbitary-length messages.
+
+Let П = (KGen, Enc, Dec) be an encryption scheme for 1-bit messages (etreme case).
+Construct a new ecnryption scheme П' = (KGen', Enc', Dec') with message space {0,1}* by defining Enc' as follows:
+
+![alt text](image-6.png)
+
+where m = m1, ..., m_l 
+
+Let П and П' be as above. If П is CPA-secure, then so in П'
+
+We have covered three security definitions for public-key encryption:
+
+1. indistinguishable encryption in the presence of an eavesdropper
+2. CPA-security
+3. indistinguishable multiple encryptions
+
+Since these are equivalent, we will follow the usual convertion from cryptographic literature and use the term "CPA-security" in the following
+
+## Security against Chosen-Ciphertext Attacks
+
+Consider the case where an eavesdropper A observers a viphertext c sent from a sender S to a receiver R. There are two ways how A might mount a chosen-ciphertext attack:
+
+1. A might send a modified ciphertext c' to R on behalf of S
+-> in case of ecnrypted email, A might construct an ecnrypted email c' and forge the "From" field to make  it look like it originates from S
+-> subsequent behavior of R might reveal some information about m' wjich in turn might reveal something about the original message m
+2. A might send a modified ciphertext c' to R in its own name
+-> A might learn the entire decryption m' of c' if R responds directly to A (think of R responding to the email quoting the initial message)
+
+The second class of attacks is specific to public-key encryption schemes- there is no private-key encryption counterpart 
+
+The CCA indistinguishable experiment ![alt text](image-7.png):
+
+1. KGen(1^n) is run to obtain keys (pk,sk)
+2. Adversary A is given pk and access to a decryption oracle Dec_sk(·). It outputs a pair of messages m0, m1 ∈ M_pk of the same length.
+3. A uniform bit b ∈ {0,1} is chosen, and then a ciphertext c <-  Enc_pk(m_b) is computed and given to A.
+4. A continues to interact with the decryption oracle, but may no request a secryption of c itself. Finally, A outputs a bit b'.
+5. The output of the experiment is 1 if b' = b, and otherwise.
+
+A public-key encryption scheme П = (KGen, Enc, Dec) has indistinguishable encryptions under a chosen-ciphertext attack (or is CCA-secure) if for all porbabilistic polynomial-time adversaries A there is a negligible function negl such that
+
+![alt text](image-8.png)
+
+The natural analogue of Theorem 12.6 holds for CCA-security: if a scheme has indistinguishable encryptions under a chosen-ciphertext security then it has indistinguishable multiple encryptions under a chosen-ciphertext attack (defined appropriately)
+
+The analogue of Claim 12.7 does not hold for CCA-security
+
+An analogue of authenticated ecnryption
+
+For private-key encryption, we defined authenticated encryption which was even stronger than CCA=security
+
+This notion cannot ne translated directly to the context of public-key ecnryption
+-> for private-key encryption schemes, a key is used only by two parties (sender and receiver)
+-> for public-key encryption schemes, the same public ley is used by many senders (sending to the same receiver holding the private key)
+
+Nevertheless, one can consider an analogue of authenticated encryption in the public-key setting: so-called signcryption
+
+
+# Hybrid Ecnryption and the KEM/DEM Paradigm
+
+Claim 12.7 showed that we can expand the message space of a public-key encryption scheme:
+
+Enc'_pk(m) = Enc_pk(m_1), ..., Enc_pk(m_l)
+
+-> we need l invocations of the original scheme and the ciphertext length increases by a multiplicative factor of l as well
+
+Better approach: use private-key encryption in tandem with public-key encryption, so-called hybrid encryption
+
+Illustration of hybrid encryption:
+
+Let Enc denote a public-key encryption and Enc' denote a private-key encryption
+
+![alt text](image-9.png)
+
+In a direct implementation, the sender would share k by
+
+1. choosing a uniform value k and
+2. encrypt k using a public-key encryption scheme
+
+A more direct approach is to use a public-key primitive called a key-encapsulation mechanism (KEM) which does these two steps "in one shot".
+
+A key-encapsulation mechanism (KEM) is a tuple of probabilistic polynomial-time algorithms (KGen, Encaps, Decaps) such that:
+
+1. The key-generation algorithm KGen takes as input the security parameter 1^n and outputs a public-/private-key pair (pk, sk). We assume pk and sk each has length at least n, and that n can be determined from pk.
+2. The ecnapsulation algorithm Encaps takes as input a public key pk (which implicity defined n). It outputs a ciphertext c and a key k ∈ {0,1} ^(l(n)), where l is key length. We write this as (c,k) <- Encaps_pk(1^n).
+3. The deterministic decapsulation algorithm Decaps takes as input a private key sk and a ciphertext c, and outputs a key k or a special symbol ⊥ denoting failore. We write this as k:= Decaps_sk(c).
+
+It is required that with all but negligible probability over the randomness of KGen and Encaps, if Encaps_pk(1^n) outputs (c, k) then Decaps_pk(c) outputs k.
+
+Any public-key encryption scheme trivially gives a KEM: choose random k and encrypt it
+-> dedicated construction, however, can be mroe efficient
+
+Using a KEM, we can implement hybrid encryption via the KEM/DEM approach (DEM: data-encapsulation mecahnism)
+
+![alt text](image-10.png)
+
+Let П = (KGen, Encaps, Decaps) be a KEM with key length n, and let П' = (KGen, Enc', Dec') be a private-key encryption scheme. Construct aa public-key encryption scheme П^(hy) = (KGen^(hy), Enc^(hy), Dec^(hy)) as follows:
+
+- Kgen^(hy): on input 1^n run KGen(1^n) and use the public and private key (pk, sk) that are output.
+
+- Enc^(hy): on input a public key pk and a message m ∈ {0, 1}* do:
+
+    1. Compute(c, k) <- Encaps_pk(1^n).
+    2. Compute c' <- Enc'_k(m).
+    3. Output the ciphertext ⟨c, c′⟩
+- Dec^(hy): on input a private key sk and a ciphertext ⟨c, c′⟩ do:
+    1. Compute k:= Decaps_sk(c)
+    2. Output the message m:= Dec'_k(c').
+
+
+What is the efficiency of the hybrid encryption scheme П^(hy)?
+
+For fixed n, let...
+- ... α denote the cost of encapsulating an n-bit key using Encaps
+- ... β denote the cost (per bit of plaintext) of ecnryption using Enc'
+
+Assume |m| > n(which is the interesting case)
+
+Then the cost, per bit of plaintext, of ecnrypting a message m using П^(hy) is
+
+![alt text](image-11.png)
+
+This term approaches β for sufficiently long messages.
+-> we achieve the functionality of public-key encryption at the efficiency of private-key encryption (at least for sufficiently long messages)
+
+We will not formalize security for KEMs but - similar to public-key encryption - one can define CPA-security and CCA-security for KEMs
+
+Regarding the security of П^(hy), one can show:
+
+- If П is a CPA=secure KEM and the private-key encryption scheme П' is EAV-secure, the П^(hy) is CPA-secure public-key encryption scheme
+    -> notice that П' requires only a weaker form of security (EAV-security) which does not imply CPA-security; the (intuitive) reason is that each message is ecnrypted using a fresh uniform key k (output by П)
+- If П is a CCA-secure KEM and П' is a CCA-secure private-key encryption scheme, the П^(hy) is CCA-secure public-key ecnryption scheme
+
+# CDH/DDH- Based Encryption
+
+## ElGamal Encryption
+
+In 1985 Taher ElGamal observed that the Diffie-Hellman key-exchange can be transformed into a public-key encryption scheme
+
+Diffie-Hellman key-exchange: Alice sends a message, Bob responds with a message, and afterwards they sahre a key k (some element of the froup G)
+
+-> If Bob sends k*m (for some m ∈ G), Alice - using her knowledge of k - can recover ,
+
+That ElGamal encryption scheme requires a slight change of perspective:
+
+- We view Alice's message as her public key
+- We view Bob's response (together with k * m) as the ciphertext
+
+The following lemma is an important result for the ElGamal encryption scheme
+
+Let G be a finite group, and let m ∈ G be arbitary. Then choosing uniform k ∈ M and setting c:= k * m, results in a uniformly distributed c ∈ G, Put  differentlym dir any c^ ∈ G, we have
+
+![alt text](image-12.png)
+
+where the probability is taken over uniform choice of k ∈ G
+
+Let c^ ∈ G be arbitary. Then 
+
+![alt text](image-13.png)
+
+Since k is uniform, the probability that k is equal to the fixed element c^ * m^(-1) is exacly 1/|G|
+
+## 355
