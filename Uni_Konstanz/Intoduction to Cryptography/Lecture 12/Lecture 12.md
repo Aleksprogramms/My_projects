@@ -282,4 +282,144 @@ Let c^ ∈ G be arbitary. Then
 
 Since k is uniform, the probability that k is equal to the fixed element c^ * m^(-1) is exacly 1/|G|
 
-## 355
+Lemma 12.15 effectively gives a perfectly secret private-key encyrption scheme:
+
+- The key k is a uniform element k ∈ G
+- To encrypt m, Alice cpmputes c:= k * m
+- TO decrypt c, Bob computes m:= c/k
+
+-> the one-time pad is an instation of this, where G = {0,1} ^ l and the group operation is bit-wise XOR
+
+The ElGamal encryption essentially adds a way for Alice and Bob to generate this shared "random-looking" value k via a public channel
+
+Let G be as before. Define a public-key ecnryption as follows:
+
+- KGen: on input 1^n run G(1^n) to obtain (G, q ,g). Then choose a uniform x ∈ Z_q and compute h:= g ^ x. The public key is ⟨G, q, g, h⟩ and the private key is ⟨G, q, g, x⟩. The message space is G.
+
+- Enc: on input a public keu pk = ⟨G, q, g, h⟩ and a message m ∈ G, choose a uniform y ∈ Z_q and output the ciphertext
+
+⟨g^y, h^y * m⟩
+
+- Dec: on input a private key sk = ⟨G, q, g, x⟩ and a ciphertext ⟨c1, c2⟩, output
+
+m^:= c2/ c1^x
+
+Correctness: Let ⟨c1, c2⟩ = ⟨g^y, h^y * m⟩ with h = g^x. Then 
+
+![alt text](image-14.png)
+
+Theorem 12.18
+
+If the DDH problem is hard relative to G, then the ElGamal encryption scheme is CPA-secure.
+
+We show that 
+
+![alt text](image-15.png)
+
+where П~ is a modified "ecnryption scheme", where a ciphertext is computed as
+
+⟨g^y, h^y * m⟩,
+
+for uniform y,z ∈ Z_q
+
+(Note that П~ is not an actual ecnryption scheme as the receiver has no way if decrypting a ciphertext, which does not matter for the proof as the experiment solely depends on the key generation and encryption)
+
+Distinguisher D
+
+The algorithm is given (G, q, g, h1, h2, h3) as input.
+
+1. Set pk = ⟨G, q, g, h1⟩ and run A(pk) to obtain two messages m0,m1 ∈ G
+2. Choose a uniform bit b, and set c1:= h2 and c2 := h3 * m_b
+3. Given the ciphertext ⟨c1, c2⟩ to A and obtain an output bit b'. if b' = b, output 1; otherwise, output 0
+
+Case 1: ![alt text](image-16.png)
+Case 2: ![alt text](image-17.png)
+
+Thus we obtain the following equalities:
+
+![alt text](image-18.png)
+
+Hardness of the DDH problem then implies:
+
+![alt text](image-19.png)
+
+This concludes the proof
+
+# RSA-based encryption
+
+## Plain RSA encryption
+
+We start with the so-called plain RSA encryption scheme, a simple (yet insecure) encryption scheme based on the RSA assumption
+
+Recall GenRSA which on input security parameter 1^n outputs a moduli N (product of two primes p and q) along with e and d such that ed = 1 mod ϕ(N)
+
+Plain RSA encryption:
+
+![alt text](image-20.png)
+
+
+Let GenRSA be as before. Define a public-key encryption scheme as follows:
+
+- KGen: on input 1^n run GenRSA(1^n) to obtain N, e and d. The public key is ⟨N, e⟩ and ptivate key is ⟨N, d⟩.
+
+- Enc: on input a public key pk = ⟨N, e⟩ and a message m ∈ Z*_N compute the ciphertext
+
+c:= [m^e mod N].
+
+- Dec: on input a private key sk = ⟨N, d⟩ and a ciphertext c ∈ Z*_N, output the message
+
+m:= [c^d mod N]
+
+Say GenRSA outputs (N, e, d) = (391, 3, 235). (Note that 391 = 17 * 23 and so ϕ = 16 * 22 = 352. Moreover, 3 * 235 = 1 mod 352) So the public key is ⟨391, 3⟩ and the private key is ⟨391, 235⟩.
+
+To ecnrypt the message m = 158 ∈ Z*_391 using the public key (391, 3), we simply compute c:= [158^3 mod 391] = 295; this is the ciphertext, To decrypt, the receiver computes [295^235 mod 391] = 158.
+
+## Security of Plain RSA Ecnryption (Construction 12.26)
+
+Hardness of factoring implies that one cannot conpute the private key from the public key
+-> a necessary but not a sufficient condition
+
+Hardness of the RSA problem implies that for a uniform message, it is hard to recover the entire message
+-> this is again insufficient
+
+Plain RSA is deterministic, hence it cannot be CPA-secure (cf. Theorem 12.4)
+
+## Padded RSA and PKCS #1 v1.5
+
+To achive CPA-security, we need a randomized ecnryption algorithm 
+
+Simple idea: pad the message with a random padding before ecnryption and remove the padding after decryption 
+
+![alt text](image-21.png)
+
+This yields Construction 12.30 (Padded RSA Encryption)
+
+## Construction 12.30 (Padded RSA Encryption)
+
+Let GenRSA be as before, and let l be a function with l(n) < 2n. Define a public-key ecnryption scheme as follows:
+
+- KGen: on input 1^n GenRSA(1^n) obtain N, e, and d. The public key is ⟨N, e⟩ and the private key is ⟨N, d⟩. The message space is G.
+
+- Enc: on input a public key pk = ⟨N, e⟩ and a message m ∈ {0, 1}^(|N| - l(n) - 1), choose a uniform string r ∈ {0,1} ^ l(n) and interpret m^:= r || m as an element Z*_N. Output the ciphertext
+
+![alt text](image-22.png)
+
+- Dec: on input a private key sk = ⟨N, d⟩ and a ciphertext c ∈ Z*_N, compute 
+
+![alt text](image-23.png)
+
+and output the |N| - l(n) - 1 least-significant bits of m^.
+
+Construction 12.30 is parameterized by the value l (length of the random padding)
+-> security clearly depends on l
+
+One can perform a brute-force attack by encrypting a message under all possible random padding valused
+-> a too short l (more precisely, l(n) = O(log n)) makes the scheme insecure
+
+For the other extreme (padding as large as possible, meaning m is just a single bit), it os possible to prove security based on the RSA assumption
+-> but this version is not really practical
+
+For other l, the situation is less clear
+-> for certain l there is neither a proof nor a polynomial-time attack known
+
+## 368
