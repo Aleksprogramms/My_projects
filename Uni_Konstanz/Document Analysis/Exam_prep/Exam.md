@@ -1084,5 +1084,379 @@ In the vector space model, we are using a localist representation:
 - There is no notion of word similarity in the vector space model
 
 
+Fundamental  limitations of the Vector Space Model
 
+The vector space model is designed to compare sequences of text based on the words they contain. But even that is problematic.
 
+Historical solution in information retrieval: Query expansion
+
+- Keep a dictionary of similar words and use it to expand the queries
+- E.g., if a user searches for motel, also add hotel to the query
+
+Query expansion is a (set of) heuristic(s) specifically designed to work around the inability of the vector space model to represent semantic meaning.
+
+Dense word Vector representations
+
+In theory:
+
+Instead of a term-document matrix, we want a term-concept matrix, in which each word is ranked according to the strength of its relation to a semantic concept.
+
+- hotel and motel are very similar and differ mostly in room price and the quality of service/
+- They are both similary low on a scale that rates the relevance for teaching, while an university is higher on that scale.
+
+The rows of such matrix could then be used as vector representations of the words. Similar words would have similar vectors.
+
+## Word embeddings [+]
+
+Word Embeddings: Definitions
+
+Embedding of words:
+
+Given a training corpus, the embedding of words is the process of assigning a vector (in a latent space) to each word, based on the content of the corpus (by using some algorithm)
+
+Word Embedding:
+
+The vector that is assigned to a word as the result of the above process is often called the embedding of the word.
+
+Latent Space
+
+A latent space(also called embedding space) is a vector space in which items are placed in such a way that similar items are placed in proximity. Typically (but not always), latent spaces have a lower rank (dimensionality) than the original space of the data.
+
+Embedding Spaces for Words
+
+For creating word embedding, the embedding algorithm should:
+
+- Place similar and/or related words in close proximity in the latent space
+- Use word (co-)occurence information from the corpus
+- Work without supervision (labeling data at this scale is infeasible)
+
+Embedding Pipeline:
+
+![alt text](image-18.png)
+
+## Latent Semantic Analysis(LSA)[--]
+
+Dimensional reduction of Term-Document Matrices
+
+Core idea: Use dimensionality reduction techniques to reduce the corpus dimension to a manageable size (e.g., n = 300) but leave the vocablary dimension as it is. The resulting row vectors are dense and capture information regarding the occurence of words in the documents.
+
+Formal approach:
+
+- Compute a singular value decomposition A = UDV of the term-document matrix A
+- Reduce the number of dimensions to retain only the k most important dimensions
+- Use the row vectors of U_k as word embeddings
+
+Disadvanteges of LSA:
+
+Latent semantic analysis has a few downsides:
+
+- It works sorely based on global cooccurrence statistics (it only knows whether words occur in the same documents)
+- It does not enable us to use compostional semantics
+
+## Word2Vec[++]
+
+The cloze Task:
+
+The cloze test is a fill-in-the-blank style examination task. For example, we can esaily fill in this blank:
+
+Natural language processing is all about _____ models.
+
+When using word2vec to create word embeddings, we are essentially training a computer to solve this task on two variations:
+
+- Given some context, learn to predict a missing word. (this is called continous bag of words or CBOW).
+- Given a word, learn to predict the context (this is skipgram)
+
+From a corpus to training: skipgram
+
+We generate training data by:
+
+- Iterating over the corpus step-by-step with a fixed window size
+- Extracting pairs of the input word in the center of the window and one target word
+
+![alt text](image-19.png)
+
+Generating training data for CBOW works the same way, except input and target words are reversed.
+
+![alt text](image-20.png)
+
+![alt text](image-21.png)
+
+We have so far generated only positive example(words that actually do cooccur)
+
+- Training a classifier only on this data would be pointless!
+- Learning nothing and always predicting cooccurrence would result in perferct accuracy -> We need to add negative examples by picking random output words
+
+![alt text](image-22.png)
+
+word2vec: model initialization
+
+word2vec is a shallow network architecture with just two layers. The layers are an embedding layer (used for learning representations of the input words) and a context layer (used for learning representations of the output words).
+
+![alt text](image-23.png)
+
+When training word2vec, we repeatedly itertate over the trainind data.
+
+- For each input word, we find the corresponding row in the embedding matrix and retrieve the current embedding
+- For the positive and negative output words, we find the corresponding rows in the context matrix and retrieve the current embeddings
+
+![alt text](image-24.png)
+
+![alt text](image-25.png)
+
+For each embedding-context pair, we compute the dot product(~ cosine similarity)
+
+- The similarity is used to predict the likelihood of the targer occuring in the context
+- We use the error to update the embeddings in both matrices
+- This process is repeated for multiple cycles over all data points until it converges
+
+![alt text](image-26.png)
+
+Word2vec: output
+
+After convergence is reached, we discard the context matrix and use the embedding matrix for our word embeddings. Each row contains the embedding of the corresponding word in the vocabulary.
+
+![alt text](image-27.png)
+
+How word2vec: works intuitively
+
+Why does word2vec produce word embeddings that produce meaningful word similarity?
+
+- During initialization, each word starts at a random location in the latent space
+- During training, each word is pulled closer towards frequently cooccuring words
+- During trainind, each word is pushed away from non-cooccuring words
+- Words end up in the proximity of other words that occur in similar contexts
+- Think of it as similutaneous hign-dimensional tug-of-war
+
+![alt text](image-28.png)
+
+## Compositional Semantics [+]
+
+Additive compositionality
+
+Word2vec was created with the idea of supporing arithmetic sultion of analogy tasks:
+
+king - man + woman = queen
+
+Compositional semantics in a Nutshell
+
+The idea behind compostional semantics:
+
+- Common semantic concepts are implicity encoded as directions in the latent space
+    - Gender
+    - Verb tenses
+    - Country/capital relations
+    - etc.
+
+- The relevance of this is hard to overstate: Being able to arithmetically solve semantic challenges on data from an unsupervised model is a huge step towards machine intelligence!
+
+Word of Caution: Similarity != Relatedness
+
+Word embeddings can be used for many downstream applications. Make sure that the assumptions used when applying them match the assumptions made during training.
+
+# Contextual Language models
+
+## Polysemy and contextualization [+]
+
+Embedding polysemous words
+
+![alt text](image-29.png)
+
+Polysemous words are common. A single embedding per words is unsufficient
+
+How (not) to handle polysemy
+
+Naive approach:
+
+- Perform word sense disambiguation on the entire corpus
+- Create embeddings of the disambiguated words
+
+Problems of the naive approach:
+
+- Error propagation (word sense disambiguation is hard)
+- Requires labeled training data (unlike the embedding methods)
+- The vocabulary size explodes
+- We also need word sense information when using the embeddings
+
+## Machine translation [-]
+
+![alt text](image-30.png)
+
+## Seq2seq learning with RNNs/ LSTMs [+]
+
+Recurrent Neural Networks (RNN)
+
+![alt text](image-31.png)
+
+Sequence to sequence learning with an RNN:
+
+- At each time step t, the neural netowrk A looks at some input x_t and outputs h_t
+- Information from step t is passed to step t + 1 in a loop
+- The number of iterations of the loop depend on the length of the sequence
+- The loop notation can be unrolled into individual steps
+- The more iterations, the more likely the model will forget previously seen information
+
+RNN architecture 
+
+![alt text](image-32.png)
+
+Long Short-Term Memory Networks (LSTM)
+
+![alt text](image-33.png)
+
+Intermediate Context Vectors 
+
+![alt text](image-34.png)
+
+From a translator to Sentence Embeddings
+
+Seq2seq learning for translation:
+
+- Words in the input sentence are encoded as word embeddings
+- Word embeddings are fed sequentially into a RNN / LSTM model
+- In each step, the input is used to update an internal context vector
+- A memory mechanism is used to keep track of relevant prior information
+- The combination criteria for input, memory,  and context vector are learned
+- To generate the translation, the steps are "reserved" by a decoder
+
+Sentence representations from translations:
+
+- The context vector that is passed form encoder to decoder lies in a latent space
+- The context vector contains the semantic information of the input sentence
+- A translation LSTM without a decoder is a sentence embedder
+
+Embeddings words in context
+
+Consider two english input sentences:
+
+- The couple lives in a house in a forest
+- The couple lives in a house in a desert
+
+The encoder creates a context vector for these sentences. An English - German decoder would generate German words one by one and "update" the context vector:
+
+- Das Paar lebt in einem Haus in [location]
+
+The context vector and memory in the final generation step retain the semantic information for forest or desert (since we have generated all other words already)
+
+Under the assumption that our model supports some kind of compositionality, we now have an intuition how to encode a word and its context in a single vector. -> We have the building blocks to contextualize word embeddings.
+
+The problem with memory and LSTMs
+
+Downsides of using memory:
+
+- Forgetting is still a oroblem, even for LSTMs
+- We cannot "remember" the future
+- ... but sentence ordering is flexible in many languages
+
+Downsides of LSTMs/ RNNs
+
+- Sentence are read sequentially
+    - Good for dealing with varying sentence lengths
+    - Bad for paralleliztion (for example in GPU)
+- Processing a sentence word by word without the ability of backtracking is defferent from natural human reading behavior
+
+Example:
+
+![alt text](image-35.png)
+
+## Attention [+]
+
+As an alternative approach to memory, we can consider attention mechanisms:
+
+- We process all words of a sentence concurrently (instead of sequentially)
+- Instead of learning to remember, we learn how to pay attenrion to the parts of a sentence that are important to a given word
+- This is called self-attention since we focus on other words in the same input sentence.
+- Grounded in syntactic/semantic relations in natural language
+
+![alt text](image-36.png)
+
+How attention works in principle:
+
+- All words in a sentence are encoded as vectors (e.g. pre-trained word embeddings)
+- All words are fed into the model in parallel, each word in its own "lane".
+- For each word, the model learns weights that are used to determine how important other words in the sentence are. (show for hte word: they)
+
+![alt text](image-37.png)
+
+## Transformers [+]
+
+The transformer model:
+
+- Originally designed for machine translation
+- Input: Sentence in language A
+- Output: Sentence in language B
+- Encoder:
+    - Processes all words of the input sentence in parallel
+    - Uses attention to determine word relations
+    - Outputs one vector per input word
+- Decoder:
+    - Sequentially processes vectors created by encoder (similar to LSTM decoder) but has access to all vectors
+    - Predict output words one at a time.
+
+Data processing
+
+![alt text](image-38.png)
+
+## BERT[++]
+
+BERT - Bidirectional Encoder Representations from Transformers
+
+BERT is a contextual language model, based on transformers:
+
+- it uses only encoders (12 transformer layers)
+- Bidirectional links connecting the "lanes" between layers
+- Trained on ~3.3 Billion words (Wikipedia & Google Books corpus)
+- Created with transfer learning in mind:
+    - trained on 2 simple unsupervised tasks
+    - Can be fine-tuned for numerous complex tasks (for which few labeled data are available)
+- Due to the transformer's attention mecahnism, we get contextualization "for free"
+
+Training data for BERT
+
+BERT uses two tasks for training, which can be generated from arbitary texts without manual labelling or supervision:
+
+- Masked language modeling (MLM)
+    - this is the cloze taks we already know
+    - Example: Today is a good day to [MASK]
+    - Unlike word2vec, BERT uses the signal from all other words in the context simultaneously for this prediction(using attention to determine weights)
+- Next sentence prediction (NSP)
+    - Given a sentence, the model has to predict the next sentence
+    - Modeled as a classification problem: Given a sentence A and B, does B follow A?
+
+Bert Input representation
+
+![alt text](image-39.png)
+
+BERT accepts input in a fixed-length window of at most 512 tokens:
+
+- Input starts with a special [CLS] token
+- Input may contain two separate sentences which are separated by a [SEP] token.
+- The second sentence is optional
+
+Training setup
+
+![alt text](image-40.png)
+
+Contextualized embeddings: Bert encoder layers
+
+![alt text](image-41.png)
+
+in principle. feature vectors from any layer can be used as embeddings, depending on the task at hand
+
+BERT produces feature vectors for each token in each of its 12 transformer layers. Due to the attention mechanism, they capture different aspects of the input tokens.
+
+Tasks supported by BERT (via Transfer Learning)
+
+![alt text](image-42.png)
+
+Word-piece Tokenization: Token != Word
+
+- Most languages have millions of words
+- Most words are very rare
+- Using a large vocabulary increases the size of the model
+
+In practice, contextual language models use word piece tokenization:
+
+- Think of it like morphological decomposition...
+- ... but driven by statistics, not linguistic insight
+
+-> keep this in mind when extracting word embeddings from BERT!
