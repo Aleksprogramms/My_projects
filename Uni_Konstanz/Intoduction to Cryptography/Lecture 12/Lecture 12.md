@@ -422,4 +422,86 @@ For the other extreme (padding as large as possible, meaning m is just a single 
 For other l, the situation is less clear
 -> for certain l there is neither a proof nor a polynomial-time attack known
 
-## 368
+## OAEP and PKCs #1 v2
+
+Recall: plain RSA is not CPA-secure
+
+But: under the RSA assumptions, one cannot recover the message from a ciphertext c = [m^e mod N] for uniformly random message  m
+
+This guarantee no longer holds when we consider chosen-ciphertext attacks
+
+The problem is that RSA is malleable:
+
+-> given an ecnryption c = [m^e mod N] of a message m, one can generate a ciphertext c' that is an ecnryption of m' = [2m mod N]. How?
+
+c' := [2^e * c mod N] = 2^e * m^e = (2m)^e mod N
+
+This allows for a chosen-ciphertext attack
+-> the attack can be extended to padded versions of RSA
+
+RSA-OAEP is a CCA-secure public-key encryption scheme
+-> follows the idea of padded RSA but uses a more complex padding
+-> padding via the Optimal Asymmetric Encryption Padding (OAEP)
+-> a version of RSA-OAEP os standardized as RSA PKCS #1 v2
+
+Visualization of the Optimal Asymmetric Ecnryption Padding (OAEP)
+
+![alt text](image-24.png)
+
+Let l(n), k(n) be integer-valued function such that l(n) + 2k(n) is less than the bit-length of the moduli output by GenRSA(1^n)
+
+Fix n and let l = l(n) and k = k(n)
+
+Let G:{0,1}^k -> {0,1}^(l + k) and H: {0, 1}^(l + k) -> {0,1}^k be two functions
+
+Mapping m ∈ {0, 1}^l to m^:
+
+1. set m' := m || 0^k
+2. choose uniform r ∈ {0, 1}^k
+3. compute t:= m' ⊕ G(r) ∈ {0, 1}^(l+k)
+4. compute s:= r ⊕ H(t) ∈ {0, 1}^k
+5. set m^ := s || t
+
+### Construction 12.36
+
+Let GenRSA and l, k be as before. Let G: {0, 1}^k -> {0, 1}^(l + k) and H: {0,1} ^ (l + k) -> {0, 1}^k be two functions. Construct a public-key encryption scheme as follows:
+
+- KGen: on input 1^n, run GenRSA(1^n) to obtaom (N, e, d). The public key is  ⟨N, e⟩ and the private key is  ⟨N, d⟩
+- Enc: on input a public key ⟨N, e⟩ and a message m ∈ {0,1}^l, set m':= m || 0^k and choose a uniform r ∈ {0, 1}^k. Then compute t:= m' ⊕ G(r); s:= r ⊕ H(t) and set m^:= s || t. Output the ciphertext c: = [m^^e mod N].
+- Dec: on input a private key ⟨N, d⟩ and a ciphertext c ∈ Z*_n, compute m^:= [c^d mod N]. If ||m^||> l + 2k, output ⊥. Otherwise, parse m^ as s || t woth s ∈ {0, 1}^k and  t ∈ {0, 1}^(k + l). Compute r:= H(t) ⊕ s and m':= G(r) ⊕ t. If the k least-significant bits of m' are not all 0, output ⊥. Otherwise, output the l most-significant bits of m'.
+
+One can show that RSA-OAEP is CCA-seucre (assuming G and H are random oracles plus the RSA assumption)
+
+Proof is too involed, hence we just discuss the ituition
+-> first CPA-security
+-> then CCA-security
+
+CPA-security of RSA-OAEP:
+
+During encryption, the sender computes
+
+m' := m || 0^k, t:= m' ⊕ G(r), s:= r ⊕ H(t)
+
+for uniform r, the ciphertext is [(S||t)^e mod N]
+
+If the attacker never queries r to G, the G(r) is a uniform random values that makes m, similar to the one-time pad
+-> in this case the attacker learns nothing about m
+
+Can the attacker query r to G?
+-> the value r itself is maked by H(t), hence the attack needs to query t to H to learn anything about r
+
+Can the attacker query t to H?
+-> requires to compute t from [(s||t)^e mod N] (essentially the RSA assumption)
+
+## CCA-security of RSA-OAEP:
+
+Idea: every decryption query is either
+
+1. a ciphertext c from an honest encryption, i.e., in which the attacker computed c by honestly encrypting a message m, or
+2. an invalid c, i.e. the decrypted messages lacks the k trailing 0s
+
+-> in the first case, the attacker already knows m, hence the decryption query is pointless
+-> in the second case, the responce from the decryption oracle is ⊥
+
+Another compilation: the reduce needs to simulate the decryption oracle without the private key
+-> here, the proof exploits that the reduction knows the random oracle queries by the attacker
