@@ -1460,3 +1460,600 @@ In practice, contextual language models use word piece tokenization:
 - ... but driven by statistics, not linguistic insight
 
 -> keep this in mind when extracting word embeddings from BERT!
+
+# Text mining 
+
+## Text classification [+]
+
+Text classification: Given a set of documents (a corpus) D and a set of classes C, assign  a class c ∈ C to each document d ∈ D. Classification is superveised learning task(we need labels)
+
+Example applications:
+
+- Tracking and filtering of news articles by topic
+- Organizing web pages into category hierarchies
+- Sorting scientific articles on arxiv,rog by discipline
+- Encoding patient records using international insurance categories
+- E-mail message filtering (aka spam detection)
+- Categorizing DocAna lecture context into (exam relevant) and (I'll maybe read it later...)
+- Etc.
+
+## Typical text classification tasks [+]
+
+Manually created rules(hand-coded):
+
+- Rules are typically based on combinations of words or other features
+    - Spam detection example: black-list-address OR (dollars AND you won)
+    - Author gender: fraction(pronouns) > 0.058
+- Advantage:
+    - Easy to achive high precision if rules are carefully defined by experts
+- Disadvanteges:
+    - Recall tends to be low since rules are not comprehensive
+    - Creating and maintaining these rules is expensive
+
+The (very typical) solution: we instead train a classifier on a labeled training corpus (i.e., supervised learning)
+
+## Naive Bayes Classifier [++]
+
+Naive Bayes Classifier:
+
+- A simple yet efficient word-based classifier for documents
+- Relies on a simple bag-of-words representation of documents
+- Naive relates to the underlying assumption of independce:
+    - We assume that features (here: words) are statistically independent of each other
+    - This is obviously a strong simplification (e.g., consider the relation between determiners and nouns)
+- Based on Bayes rule:
+
+![alt text](image-43.png)
+
+Overview
+
+Training input:
+
+- A collection of N documents
+- A set C of classes c_k ∈ C for k = 1,2, ..., |C|
+- The vocabulary V of all words w_i ∈ V for i = 1,2, ..., |V|
+
+Input at prediction time:
+
+- A new document d consisting of words w_1, w_2, ..., w_n
+
+Desired output:
+
+- The most likely class class(d) of document d
+
+Class porbability
+
+To determine the most likely class for document d, we want to find:
+
+![alt text](image-44.png)
+
+But how do we obtain p(d|c) and p(c)?
+
+Computing p(c) from our training data for all classes c is simple: it is overall frequency of each class in our training data. Thus:
+
+![alt text](image-45.png)
+
+To compute p(d|c), we rewrite p(d|c) = p (w1, w2, ..., w_n|c) since d consists of these words (bag-of-words assumption). Then we use the independence assumption to further rewrite:
+
+![alt text](image-46.png)
+
+Computing the individual p(w_i|c) from our training data is also simple: It is overall frequency of word w_i in all documents with class c.
+
+![alt text](image-47.png)
+
+Putting the components together
+
+![alt text](image-48.png)
+
+, where:
+
+![alt text](image-49.png)
+
+are estimated on the training corpus, with:
+
+- N: number of documents
+- w_i: a specific word occuring in document d
+- w: any word in the training corpus
+- c: a specific class from C
+
+Laplace smoothing
+
+The algorithm has one major weakness: What happens if a new document d contians a word w_i that never occurs in even a single class in the training corpus?
+
+![alt text](image-50.png)
+
+And thus:
+
+![alt text](image-51.png)
+
+To avoid this, we add a small constant and normalize accordingly:
+
+![alt text](image-52.png)
+
+Update Version:
+
+![alt text](image-53.png)
+
+where:
+
+![alt text](image-54.png)
+
+are estimated on the training corpus, with:
+
+- N: number of documents
+- w_i: a specific word occuring in document d
+- w: any word in the training corpus
+- c: a specific class from C
+- |V|: size of vocabulary of the training corpus
+
+![alt text](image-55.png)
+
+![alt text](image-56.png)
+
+![alt text](image-57.png)
+
+Using General classification Algorithms for Text
+
+There are plenty of classification algorithms available ...
+
+- Decision Trees
+- Random Forests
+- Support Vector Machine (SVM)
+- Gradient Boosting
+- Deep Learning
+
+But they don't work out of the box. We need features to represent the documents. Typically, features are vectors, so we can use:
+
+- Word counts
+- TF-IDF vectors
+- Word/ sentence / document embeddings
+- Etc. 
+
+## Features for text classification/ clastering [+]
+
+Many further features can be extracted:
+
+- Word counts
+- Casing
+- Word/character n-grams
+- Punctuation
+- POS tags
+
+Non-linguistic features
+
+- Document formating
+- Encoding sequences (e.g., &lt)
+- Metadata
+
+Some feature may be more useful than others, depending on the class labels:
+
+- Readability
+- Writing style
+- Sentiment
+- Trustworthiness of news articles
+- Suitability for children
+- Language detection
+- ...
+
+Even modern deep learning methods suffer from bad feature selection and lack of good pre-processing. Garbage in, garbage out!
+
+Classification with contextual language models
+
+![alt text](image-58.png)
+
+Transformers-based language models are designed for transfer-lerning
+
+- The final layer can be replaced or adapted
+- Arbitary classification tasks are possible(in thoery)
+- Fine-tuning on labeled data imporves the classification performance
+
+Text clustering:
+
+Given a set of documents (a corpus) D, clustering is the task of separating the documents d ∈ D into clusters such that documents in the same cluster are similar and documents in different clusters are dissimilar. Clustering is an unsupervised learning task(no labels)
+
+![alt text](image-59.png)
+
+Clustering algorithms and features for text
+
+Many clustering algorithms can be applied to text:
+
+- k-means
+- DBSCAN
+- Hierarchial agglomerative clustering
+- Spectral clustering
+- Guassian mixiture models
+- ...
+
+Features for clustering:
+
+- Clustering typically works on vector data
+- All the cavears of feature selection we  discussed for classification apply
+
+Which algorithm and features you should use depends on the use case (as usual):
+
+- Do you know how many clusters there are in the data?
+- Do you want to create a hierarchial grouping of documents?
+- What semantic differences/similarities should exist between clusters?
+
+## Topic modeling[+]
+
+Text clustering vs. Topic modeling 
+
+If we use appropriate features and similary metric, clustering can be used to identify groups(= clusters) of documents that have similar content (= talk about hte same things).
+
+- What is the problem with that output?
+- We don't know what the documents are about!
+
+Topic models:
+
+Statistical methods that analyze the words of the documents to discover common themes and how these themes are connected to each other.
+
+Application of Topic Models
+
+Topic models can be used, for example, to:
+
+- Uncover themes(= topics) in document collections:  Detect common topics in the documents(e.g., genres in books)
+- Recommender systems:  Determine topical realtions to recommend articles with a similar topic structure to a reader
+- Semantic drift analysis: Detrmine how the co-usage of words changes over time.
+- Etc.
+
+Topic models are based on two basic assumptions:
+
+- Each document consists of distribution over topics
+- Each topic consists of a distribution over words
+
+![alt text](image-60.png)
+
+Probabilistic Topic Modeling Algorithms
+
+While there are many algorithms, probabilistic models are the most common:
+
+- LDA(Latent Dirichlet Allocation) is the most widely used model
+- LSA or LSI: latent semantic analysis or latent semantic indexing
+- NMF: Non-Negative Matrix factorization
+
+## Matrix factorization [--]
+
+?
+
+## Latent Dirichlet Allocation (LDA)[-]
+
+Assumptions:
+
+- The order of words in the document does no matter (bag-of-words)
+- The order of documents does not matter
+- The number of topic is known and fixed
+
+Topic assigment alogrithm (using Gibbs sampling):
+
+- Assume there are k topics across all documents d
+- Assign each word occurence (= tokens) w to a topic at random
+- For each token w in document d,
+    - Assume its topic is wrong (but every other assigment in d is correct)
+    - Probabilistic assign token w a new topic based on:
+        - The topic of other in d
+        - How often occurrences of word w in other documents have been assigned a particular topic
+- Repeat this process for each document until it converges
+
+# Relation extraction and Sentiment analysis
+
+## Relation extraction task[+]
+
+?
+
+## Relation extraction methods [+]
+
+Intuition for a simple, rule-based relation extraction framework:
+
+If the mention of a hyponym and hyperonym in a sentence are connected in a cleraly distinguishable pattern, we can construct a rule to extract the relation.
+
+Example:
+
+- Agar is a substance prepared from a mixture of red algae, such as Gelidium, for laboratory or industrial use.
+- A human can easily answer the question: What is Gelidium?
+- We can create a rule: ... X, such as Y ... -> Y is a type of X
+
+Hand-written rules for hyponym extraction
+
+We can expand the set of patterns to cover similar linguistic constructs and create a set of extraction rules:
+
+![alt text](image-61.png)
+
+Advanteges:
+
+- Manually curated rules tend to have a high precision
+- Can be tailored to specific domains
+
+Disadvanteges:
+
+- Manually curated rules often havelow recall
+- A lot of manual work is required to maintain rulesets
+
+In other words:
+
+- The usual caveats apply
+- How can we improve this approach?
+
+Sidebar: Bootstrapping
+
+Bootstrapping:
+
+A self-starting process that continues and/or grows without further external input.
+
+-  The name is derived from the idea of "pulling oneself up by one's won bootstraps", describing an impossible task.
+- Similar idea to the story of Baron Munchausen, who pulled himself (and his horse) out of a swamp by his hair.
+
+Similar concept in statistics:
+
+Bootstrap sampling to simulate having multiple different data sets (although you only have one) by repeatedly sub-sampling a single data set, for example to derive confidence intervals.
+
+Leveraging Named entities for pattern discovery
+
+In a knowledge base, relations are typically encoded as triples:
+
+- [Alan Turing] (PER) was employed by the [University of Manchester] (ORG)
+- We can use such templates to identify patterns in which relation may oocur in a corpus: [PER] was employed by [ORG] -> entity types can help us create pattern templates
+
+Distantly supervised Relation Extraction
+
+Intuition:
+
+Starting with a few seed entites, find cooccurrences of these entites to identify patterns. Use the patterns as templates for discovering new enitites. Repeat.
+
+Example:
+
+- Seed entitites: [Alan Turing] (PER) and [Univeristy of Manchester] (ORG)
+- Matching cooccurence in a corpus:  [Alan Turing] (PER) was employed by the [UOM] (ORG)
+- Extracted pattern:  [PER] was employed by [ORG]
+- Finding other occurences of the pattern in the corpus: [Richard Feymann] (PER) was employed by [Cornell University] (ORG)
+-  New entities: Richard Feyman and Cornell University
+
+Distantly supervised relation extraction in a Nutshell
+
+Advanteges:
+
+- We only need minimal input (a few seed enitites or patterns) -> semi-supervised approach (also called distant supervision)
+- System learns to extract new relations on its own
+- Improved recall
+
+Disadvanteges:
+
+- A trade-off between precision and recal becomes necessary: when do we stop mining for more rules?
+- Recall is still not perfect - not all realtions (always) occur in obvious patterns
+
+Supervised methods can be used for relation extraction by following the usual approach.
+
+Setup and desing:
+
+- Define a set of relations for extraction
+- Selection a set of relevant named entities
+
+Data:
+
+- Compiling a representative training corpus
+- Labeling named entities in the corpus
+- Annotating relations between these entites (manually or pattern-based)
+
+Training classifier:
+
+- Naive Bayes
+- SVM
+- ...
+
+Feature examples for supervised relation extraction
+
+Example sentence: american airlines, a unit of AMR, immediately matched the move, spokesman Tim Wagner said.
+
+Enity-based features:
+
+- Entity 1, type - ORG
+- Entity 1, head - airlines
+- Entity 2, type - PER
+- Entity 2, head - Wagner
+- Concatenated type -  ORGPER
+
+Word-based features:
+
+- Between-entity bag-of-words {a, unit, of, AMR, immediately, matched, the,   move, spokesman}
+- Word(s) before entity 1 - None
+- Word(s) after entity 2 - said
+
+Syntactic features:
+
+- Constituent path
+
+NP ↑ NP ↑ S ↑ S ↓ NB
+
+- Base syntactic chunk path
+
+NP → NP → PP → ADVP → VP → NP → NP
+
+- Typed dependency path
+
+Airlines <- [subj] matched <- [comp] said [subj] -> Wagner
+
+Neural language models for relation extraction
+
+Pre-trained contextual language models can be used to build relation extraction pipelines by leveraging what the model has learned about word relations (e.g., via attention): 
+
+- This is transfer learning. The model is
+    - Trained on an unsupervised task, and
+    - fine-tuned for relation extraction.
+- Adaptation of an annotation task:
+    - Given a sentence with masked entites, the model is trained to label tokens with relation types.
+- Adaptation of extractive question answering:
+    - Given a sentence and the question "How are entites A and B related", the model outputs begin and end token indices of the relation in the sentence.
+
+Supervised relation extraction in a Nutshell
+
+Advanteges:
+
+- we can obtain high accuracy (both precision and recall) as long as we have sufficient labeled data
+
+Disadvateges:
+
+- Data hungry: requires a lot of labeled training data
+- Often poor perfomance when adapting from one to domain to another (but transfer learning techniques can be helpful)
+
+## Sentiment analysis applications and tasks [+]
+
+Sentiment analysis:
+
+Broadly speaking, sentiment analysis describes the tasks of identifying, extracting, quantifying, and studying affective states of the authors and expressed subjective information in text.
+
+Example: positive and negative movie reviews
+
+![alt text](image-62.png)
+
+Applications
+
+- Movies: is this review positive or negative?
+- Products: what do people think about the new iPhone?
+- Public sentiment: how is consumer confidence?
+- Politics: what do people think about this candidate or issue?
+- PredictionL predict election outcomes or market trends from sentiment
+- Feedback: mine user feedback for suggestions or critisism
+- etc.
+
+Tasks:
+
+the defenition of sentiment analysis is often vague.
+
+Alternative names:
+
+- Opinion extraction
+- Opinion mining
+- Sentiment mining
+- Subjective analysis
+- ...
+
+Related detection/ classisfication tasks:
+
+- Subjectivity
+- Bias
+- Stance
+- Hate-speech
+- Sarcasm
+- Deception and betrayal
+- Online trolling
+- Polarization
+- Politeness
+- Linguistic alignment
+- ...
+
+## Scherer typology [-]
+
+Emotion: brief organically synchronized [...] evaluation of major event
+
+- angry, sad, joyful, fearful...  
+
+Mood: diffuse non-caused low-intensity long-duration change in subjective feeling
+
+- cheerful, gloomy, irritable... 
+
+Interpersonal stances: affective stance toward another person in a specific interaction
+
+- friendly, flirtatious, distant, cold... 
+
+Attitudes: enduring, affectively colored beliefs, dispositions towards objects or persons
+
+- liking, loving, hating, valuing, desiring... 
+
+Personality traits: stable personality dispositions and typical behavior tendencies
+
+- nervous, anxious reckless, morose...
+
+## Features for sentiment analysis [+]
+
+Sentiment analysis is the detection of attitudes:
+
+- Who is the holder of the attitude
+- Who is the target of the attitude
+- What is typer of attitude? Type of attitude:
+
+    - From a set of types like, love, hate, value, desire, etc.
+    - More commonly: simply weighed polarity: positive, negative, neutral (together with strength)
+
+- Text containing the attitude
+
+    - Sentence, paragraph, or document
+
+
+For sentiment classification, most classifiers can be used. As usual, the art lies in selecting and extracting good features and addressing challenges.
+
+Challenges in extraction of features include:
+
+- Tokenization
+- Stemming
+- Negation
+- Subtleties (or: the limits of features that do not capture semantics)
+
+Tokenization
+
+Punctuation is typically removed or collapsed in preprocessing. But for sentiment analysis, it may contain valuable signals
+
+- Repetition pf punctuation for emphasis
+
+    An amazing movie vs. An amazing movie !1!!
+
+- Masked for expletives i !@#$ing hate data cleaning!
+- Emotions are mostly punctuation, but may carry some sentiment signal than most words.
+
+Stemming
+
+Stemmers heuristically identify word suffexes and strip them, with some regularization of the endings. This runs the risk of merging tokens with positive and negative connotation.
+
+![alt text](image-63.png)
+
+stemming can be helpful for pooling the signal, but choose the stemmer with caution!
+
+Negation
+
+Negation reverses the polarity of certain words:
+
+- This move was good vs, the move was not good
+- I recommend this product vs. I do not recommend this product
+
+Wordaround: Simple negation marking,
+
+We append a _NEG suffix to every word that occurs between a negation and the nex punctuation mark at the level of the current clause.
+
+This movie was not good, but the popcorn was great.  This movie was_NOT good, but the popcorn was great. I do not recommend this product. I do not recommend_NOT this_NOT product_NOT.
+
+Drawback: the vocabulary size just doubled...
+
+## Sentiment Lexica[--]
+
+MPQA subjectivity cues Lexicon
+
+- 6,885 words from 8,221 lemmas
+
+    - 2,718 positive
+    - 4,912 negative
+- Each word annotated for intensity (strong, weak)
+
+- published under GNU GPL
+
+SentiWordNet
+
+- Extension of WordNet with sentiment valuse. All synsets automatically annotated for degrees of positivity, negativity, and objectiveness
+- [estimable (J, 3)] may be computed or estimated Pos 0, Neg 0, Obj 1
+- [estimable (J, 1)] deserving of respect Pos 0.75, Neg 0, Obj 0.25
+
+
+Of course, pre-trained contextual language models can be fine-tuned for sentiment analysis:
+
+- This is transfer learning. The model iis
+    - Trained on an unsupervised task, and
+    - fine-tuned for sentiment analysis
+
+- Adapatation of a classification task:
+    - Given a sentence determine to which sentiment class it belongs.
+
+- Adaptation of a regression task:
+    - Given a sentenve output a sentiment score
+
+## Quotation attribution [--]
+
+# Summarization and question answering
+
