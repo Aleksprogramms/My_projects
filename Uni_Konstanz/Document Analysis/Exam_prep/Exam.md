@@ -46,7 +46,9 @@ Neural language models:
 
 ## Distributional sematics [++]
 
-?
+“You shall know a word by the company it keeps.” — J.R. Firth
+
+the main idea, is that we do not understand the meaning of the word in a dictionary, we understand it in the context, where it was used
 
 ## Zipf's law [+++]
 
