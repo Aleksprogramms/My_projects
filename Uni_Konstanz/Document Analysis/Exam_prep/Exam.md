@@ -1717,7 +1717,7 @@ While there are many algorithms, probabilistic models are the most common:
 
 ## Matrix factorization [--]
 
-?
+Mathematical technique with thich we can split the matrixes to smaller. So that the composition of small matrix will remain the same
 
 ## Latent Dirichlet Allocation (LDA)[-]
 
