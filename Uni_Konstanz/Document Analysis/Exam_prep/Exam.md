@@ -2058,7 +2058,7 @@ Of course, pre-trained contextual language models can be fine-tuned for sentimen
 
 ## Quotation attribution [--]
 
-?
+Idea: Who said that phrase?
 
 # Summarization and question answering
 
