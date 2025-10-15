@@ -46,7 +46,9 @@ Neural language models:
 
 ## Distributional sematics [++]
 
-?
+“You shall know a word by the company it keeps.” — J.R. Firth
+
+the main idea, is that we do not understand the meaning of the word in a dictionary, we understand it in the context, where it was used
 
 ## Zipf's law [+++]
 
@@ -516,6 +518,7 @@ Constituency parsing:
 # Named Enity Recognition and Linking 
 
 ## Events [--]
+
 
 The 5 Ws of Journalism
 
@@ -1714,7 +1717,7 @@ While there are many algorithms, probabilistic models are the most common:
 
 ## Matrix factorization [--]
 
-?
+Mathematical technique with thich we can split the matrixes to smaller. So that the composition of small matrix will remain the same
 
 ## Latent Dirichlet Allocation (LDA)[-]
 
@@ -2055,7 +2058,7 @@ Of course, pre-trained contextual language models can be fine-tuned for sentimen
 
 ## Quotation attribution [--]
 
-?
+Idea: Who said that phrase?
 
 # Summarization and question answering
 
