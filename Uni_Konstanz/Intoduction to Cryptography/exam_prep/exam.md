@@ -245,58 +245,6 @@ D receives as input 1^n and access to an oracle O: {0,1}^n -> {0,1}^n
 3. Choose a unifrom bit b and compute c:= w xor m_b
 4. When A outputs a bit b', outputs 1 if b' = b, and 0 otherwise
 
-## Modes of operation and encryption in practice
-
-Formally, a stream cipher is a pair of deterministic algorithm(init, Next) where:
-
-- Init takes as input a seed s and an optional initialization vector (IV) iv, and outputs some initial state st
-- Next takes as input a current state st and outputs a bit y along with an updates state st'.
-Starting from some initial state st_0, we can generate any number of bits by repeatedly calling Next
-
-A shorthand, we define an algorithm GetBits which takes as input an initial state st0 and the desired output length 1^l and does the following:
-
-1. For i = 1 to l, compute(y_i, st_i) := Next(st_(i-1))
-2. Return the l-bit string y = y_1, ..., y_l as well as the final state st_l.
-We write GetBits_1 for the algorithm that runs GetBits and only outputs the generated bits, i.e., y = y_1...y_l
-
-Visualization of a stream cipher (without an IV):
-![alt text](image-25.png)
-
-A stream cipher without an IV is a basically a pseudorandom generator with a more flexible interface: -> running Init on a uniform seed s to obtain st_0 and then generating any (polynomal) number of bits using GetBits_1, the result is pseudorandom
-
-Given a stream cipher (Init, GetBits) and a parameter l = l(n) > n. define
-
-![alt text](image-26.png)
-
-Then the stream cipher is secure if G^l is a pseudorandom generator for any polynomial l.
-
-Security of a stream cipher that does tak an IV can be defined in multiple ways
-
-Specificallym consider the case where uniform seed s is chosen and Init(s, .) is run repeadedly for different ic; the requirment is that runnign GetBits_1 using the different initial states should producestreams that appear independently uniform
-
-Given a stream cipher (Init, GetBits) and a parameter l = l(n) > n, define
-
-![alt text](image-27.png)
-
-Then the stream cipher is secure if F^l is a pseudorandom function for any polynomial l
-
-Stream cipher from a pseudorandom function
-
-![alt text](image-28.png)
-
-Let F be a pseudorandom function. Define a stream cipher(Init, Next) as follow, where Init accepts a 3n/4-bit initializtion vector and Next outputs n bits in each call:
-
-- Init: on input s ∈ {0, 1}^n and iv ∈ {0, 1}^(3n/4), output st = (s,iv,0).
-- Next: on input st - (s, iv, i), output ![alt text](image-29.png) and updated state st' = (s, iv, i + 1)
-
-Stream cipher modes of operation
-
-How to encrypt arbitary long messages using a stream cipher (Init, Next)?
-
-We discuss two modes:
-
-1. Synchronized mode
-2. Unsynchronized mode
 
 ## Synchronized mode
 
@@ -366,15 +314,323 @@ Secrecy and integrity are often confused and interwined -> encryption does not (
 
 ## Message Authentication Codes (MACs)
 
-To achieve message integrity, we introduce a new cryptographic primitive called message authentication codes (MACs)
+A message authentication code П = (KGen, Mac, Vrfy) is strongly secure, if for all probabilistic polynomail-time adversaries A there is a negligible function negl such that
 
-The setting is similar to private-key encryption, in the sence that Alice and Bob share some secret key but rather the goal is to achive messag integrity rather than secrecy
+![alt text](image-40.png)
 
-What does it mean for a MAC to be secure?
+It is easy to see that secure MACs using canonical verification are also strongly secure:
 
-Intuitive idea: no efficient adversary should be able to generate a valid tag for any "new" message that was not previously sent (and authenticated) by the communicating parties
+Let П = (KGen, Mac, Vrfy) be a secure (deterministic) MAC that uses canonical verification. Then П Is strongly secure.
 
-What about the "previously authenticated" message? How are they chosen? -> we allow the adversary to choose these message to model the case that adversarial actions might influence the messages authenticated by Alice and Bob -> similar to how the adversary can influence the messages that are encrypted (chosen-plaintext attack)
+
+## Strong Unforgeability
+
+Existential unforgeability ensures that an adversary which received message-tag pair (m1, t1), ...,(m_q, t_q) cannot generate a valid tag for a new message m' !∈ {m1,...,m_q}
+
+It does not rule out that an attack can find a different tag for a previously authenticated message, i.e., t'_i != t_i with Vrfy(m_i, t'_i) = 1
+
+In standard applications, this is not a concern; in some other, one might one to rule out this possibility
+
+We can define the experiment Mac-sForge_(A,П) similar to Mac-Forge_(A,П) with the difference that Q stores pairs of oracle queries and responses and the final check is modified to (m,t) !∈ Q, for (m,t) the output of A.
+
+## Construction Secure Message Authenctication Codes
+
+A fixed-length MACs
+
+Pseudorandom functions are a natural tool for constructing secure MACs Idea:
+
+- Tags are obtained by applying a pseudorandom functions
+- Forging a tag requires to guess the output on a "new" input
+- Probability of guessing the output of a random function is 2^ (-n)
+- Probability for a pseudorandom functioncan only be negligibly larger
+
+Let F be a (length preserving) pseudorandom function. Define a fixed-length MAC for messages of length n as follows:
+
+- Mac: on input a key k ∈ {0,1}^n and a message m ∈ {0,1}^n, output the tag t:= F_k(m).
+- Vrfy: on input a key k ∈ {0,1}^n, a message m ∈ {0,1}^n, and a tag t ∈ {0,1}^n, output 1 if and only if t = F_k(m)
+
+![alt text](image-41.png)
+
+If F is a pseudorandom function, then this construction is a secure fixed-length MAC for messages of length n.
+
+### Distinguisher D
+
+D is given input 1^n and access to Oracle O: {0,1}^n -> {0,1}^n, and words as follows:
+
+1. Run A(1^n). Whenever A queries its MAC oracle on a message m(i.e., whenever A request a tag on a message m), answer this query in the following way:
+
+Query O with m and obtain response t; return t to A.
+
+2. When A outputs (m,t) at the end of its execution, do:
+
+2.1 Query O with m and obtain response t'. 2.2 If (1) t' = t and (2) A never queried its MAC oracle on m, the output 1; otherwise, output 0.
+
+## Domain Extension for MACs
+
+Construction shows a general paradigm for message authentication codes form pseudorandom functions
+
+Limirations: only messages of fixed-length can be handled, which is unacceptable for most apllications
+
+Next step: Construct a MAC handling arbitary-length messages from a fixed-length MAC -> the construction is not very effictient
+
+Let П' = (Mac', Vrfy') be a secure fixed-length MAC for messages of length n
+
+## Authenticated Encryption
+
+A private-key encryption scheme is an authenticated encryption (AE) scheme if it os CCA-secure and unforgeable.
+![alt text](image-43.png)
+
+## Authenticated Encryption Schemes
+
+1. Encrypt-and-authenticate
+2. Authenticate-then-encrypt
+3. Encypt-then-authenticate
+
+![alt text](image-48.png)
+
+### Hash functions 
+
+Hash function take inputs of some length and compress them into short,fixeed-length outputs Classical use-case (non-cryptographic hash functions): data structures
+
+- Store elements in a table based on their hash value
+- To look for an enry x, one needs only to probe row H(x) of the hash table
+- A 'good' hash functions has few collisions (which increase look-up time)
+
+Collison-resistant hash functions (cryptographic hash functions) are similar, but with fundamental differences:
+
+- collisions need to be avoided (rather than minimized)
+- Adversaries can select inputs with the sole purpose to cause collisions
+
+A hash functions (with output length l(n)) is a pair of probabilistic polynomial-time algorithms H = (KGen, H) satisfying the following:
+
+- KGen is a probabilistic algorithm that takes as input a security parameter 1^n and outputs a key s. We assume that n is implicit in s.
+- H is a deterministic algorithm that takes as input a key s and a string x ∈ {0,1}* and outputs a string H^s(x) ∈ {0,1}^l(n) (where n is the value of security paramater implicit in s).
+
+## Unkeyed hash functions 
+
+In practice, cryptographic hash functions are generally unkeyed
+
+Problematic from a theoretical point of view -> there is always a constant-time algorithm that outputs a collsion for H: Algorithm that has a colliding pair hardcoded and simply outputs it
+
+In practice still sufficient because colliding pairs for real-world hash functions are hard to find.
+
+## Weaker Notions of Security
+
+In some applications, weaker forms of security can be sufficient Other security notions that are considered sometimes:
+
+Second-preimage resistance: Informally, a hash function is said to be second-preimage resistant if given s and a uniform x it is infeasible for a PPT adversary to find x' != x such that H^s(x') = H^s(x)
+
+Preimage resistance: Informally, a hash function is preimage resistant if given s and y = H^s(x) for a uniform x, it is infeasible for a PPT adversry to find a value x' (whether equal to x or not) with H^s(x') = y.
+
+Implications:
+
+- Collision resistance -> second-preimage resistance
+- Second-preimage resistance -> preimage resistance (under additional requirements)
+
+## The Merkle-Damgard Transform
+
+In many applications, we require hash functions accepting very long or even arbitary long inputs
+
+It is not immediately clear how we can construct such functions
+
+It is easier to construct a fixed-length hash function (a compression function)
+
+The Merkle-Damgard transforms converts a compression function into a hash function
+
+![alt text](image-51.png)
+
+## HMAC
+
+![alt text](image-52.png)
+
+## Substitution-Permutation Networks
+
+A substitution-permutation network (SPN) can be viewed as an implementation of the confustion-diffusion paradigm
+
+Evaluating the cipher proceeds in a series of rounds, each of which consists of the following sequence of operations to the input x of that round:
+
+1. Key mixing: Set x := x xor k, where k is the current-round sub-key;
+2. Substitution: Set x:= S1(x1)|| ... || S8(x8), where x_i is the ith byte of x;
+3. Permutation: Permute the bits of x to obtain the output of the round.
+
+Input to the cipher is the input to the first round
+
+Output of a round is the input to the next round
+
+After the final round, a final key-mixing step is applied and the result is the output of the cipher -> without this, step 2 (substitution) and step 3(permutation) of the last round do not provide more security as they can be inverted without the key -> By Kerckhoffs' principle, the S-boxes and mixing permutation(s) are assumed to be public
+
+An r round SPN has:
+
+- r rounds of key mixing, S-box substitutions, and applications of a mixing permutations
+- l (final) key mixing step
+
+![alt text](image-53.png)
+
+An SPN is invertible (given the key):
+
+- If each round is invertible, one can invert the whole SPN round-by-round
+- Inverting each round:
+    - (Step 3) Mixing permutation can easaily be inverted as it just shuffles the bits
+    - (Step 2) S-boxes are permutations, hence also invertible
+    - (Step 1) XORing the correct sub-key then yields the original input
+
+
+## The avalanche effect
+
+Idea: small changes in the input must "affect" every bit of the output
+
+How can we ensure the avalanche effect in a substitution-permutation network?
+
+Ensure that the following two properties hold (and sufficiently many rounds are used):
+
+1. The S-boxes are designed so that changing a single bit of the input to an S-box changes at least two bits in the output of the S-box
+2. The mixing permutations are designed so that the bits output by any given S-box affect the input to multiple S-boxes in the next round
+For a 129-bit block length, at least 7 rounds are needed to guarantee that all output bits are "affected"
+
+-> only a lower bound; if less than 7 rounds are used there are some output bits that are not affected by a single-bit change in the input (which implies that ine can distinguish the cipher from a random permutation)
+
+## Feistal Networks 
+
+A substitution permutation networks constructs a permutation from invertible components
+
+A Feistel network constructs a permutation from non-invertible components
+
+In a (balanced) Feistel network with l-bit block length, the ith round function f_i takes as input a sub-key k_i and an l/2-bit input and outputs an l/2-bit output
+
+When some master key k, which defines sub-keys k_i for each round, is chosen, define
+
+![alt text](image-54.png)
+
+The ith round of a Feistel network works as follows:
+
+1. the l-bit input is split into two halves denoted by L_(i-1) and R_(i-1)
+2. the output is (L_i, R_i), where L_i:= R_(i-1) and R_i:= L_(i−1) ⊕ f_i(R_(i−1))
+
+## Key-Distribution Centers
+
+Some of the problems can be solved using a key distribution center (KDC)
+
+Consider the scenario of a large corporation where all pairs of empolyees must be able to communicate securely
+
+We can assume that the employees trust some entity, e.g., the system administrator - at least regarding work-related communication
+
+This trusted party can act as a KDC:
+
+- whenever a new employee joins the corporation, it receives a key shared between the employee and the KDC
+- when an employee wants to communiczte with another employee, it can request a (session) key from the KDC
+
+![alt text](image-55.png)
+
+Advantages:
+
+- Each employee needs to store only one long-term key (the one shared with the KDC); session keys are short-term that can be erased after the session
+- For each new employee only that employee must set up a key with the KDC; no other employee needs to do anything
+
+Disadvantages:
+
+- The KDC is a high-value target: a successful attack on the KDC will result in a complete break of the system
+- The KDC is a single point of failure: if the KDC is offline, secure communication is themporarily impossible -> KDC is a high-value
+
+## ElGamal Encryption
+
+The following lemma is an important result for the ElGamal encryption scheme
+
+Let G be a finite group, and let m ∈ G be arbitary. Then choosing uniform k ∈ M and setting c:= k * m, results in a uniformly distributed c ∈ G, Put differentlym dir any c^ ∈ G, we have
+
+![alt text](image-63.png)
+
+where the probability is taken over uniform choice of k ∈ G
+
+Let c^ ∈ G be arbitary. Then
+
+Since k is uniform, the probability that k is equal to the fixed element c^ * m^(-1) is exacly 1/|G|
+
+![alt text](image-64.png)
+
+Lemma 12.15 effectively gives a perfectly secret private-key encyrption scheme:
+
+- The key k is a uniform element k ∈ G
+- To encrypt m, Alice cpmputes c:= k * m
+- To decrypt c, Bob computes m:= c/k
+
+-> the one-time pad is an instation of this, where G = {0,1} ^ l and the group operation is bit-wise XOR
+
+The ElGamal encryption essentially adds a way for Alice and Bob to generate this shared "random-looking" value k via a public channel
+
+Let G be as before. Define a public-key ecnryption as follows:
+
+- KGen: on input 1^n run G(1^n) to obtain (G, q ,g). Then choose a uniform x ∈ Z_q and compute h:= g ^ x. The public key is ⟨G, q, g, h⟩ and the private key is ⟨G, q, g, x⟩. The message space is G.
+
+- Enc: on input a public keu pk = ⟨G, q, g, h⟩ and a message m ∈ G, choose a uniform y ∈ Z_q and output the ciphertext
+
+⟨g^y, h^y * m⟩
+
+- Dec: on input a private key sk = ⟨G, q, g, x⟩ and a ciphertext ⟨c1, c2⟩, output
+m^:= c2/ c1^x
+
+Correctness: Let ⟨c1, c2⟩ = ⟨g^y, h^y * m⟩ with h = g^x. Then
+
+![alt text](image-65.png)
+
+If the DDH problem is hard relative to G, then the ElGamal encryption scheme is CPA-secure.
+
+We show that
+
+![alt text](image-66.png)
+
+where П~ is a modified "ecnryption scheme", where a ciphertext is computed as
+
+⟨g^y, h^y * m⟩,
+
+for uniform y,z ∈ Z_q
+
+(Note that П~ is not an actual ecnryption scheme as the receiver has no way if decrypting a ciphertext, which does not matter for the proof as the experiment solely depends on the key generation and encryption)
+
+### Distinguisher D
+
+The algorithm is given (G, q, g, h1, h2, h3) as input.
+
+1. Set pk = ⟨G, q, g, h1⟩ and run A(pk) to obtain two messages m0,m1 ∈ G
+2. Choose a uniform bit b, and set c1:= h2 and c2 := h3 * m_b
+3. Given the ciphertext ⟨c1, c2⟩ to A and obtain an output bit b'. if b' = b, output 1; otherwise, output 0
+
+Case 1: ![alt text](image-67.png)
+
+Case 2: ![alt text](image-68.png)
+
+Thus we obtain the following equalities:
+![alt text](image-69.png)
+
+Hardness of the DDH problem then implies:
+
+![alt text](image-70.png)
+
+## Plain RSA encryption
+
+We start with the so-called plain RSA encryption scheme, a simple (yet insecure) encryption scheme based on the RSA assumption
+
+Recall GenRSA which on input security parameter 1^n outputs a moduli N (product of two primes p and q) along with e and d such that ed = 1 mod ϕ(N)
+
+Plain RSA encryption:
+
+![alt text](image-71.png)
+
+Let GenRSA be as before. Define a public-key encryption scheme as follows:
+
+KGen: on input 1^n run GenRSA(1^n) to obtain N, e and d. The public key is ⟨N, e⟩ and ptivate key is ⟨N, d⟩.
+
+Enc: on input a public key pk = ⟨N, e⟩ and a message m ∈ Z*_N compute the ciphertext
+
+c:= [m^e mod N].
+
+Dec: on input a private key sk = ⟨N, d⟩ and a ciphertext c ∈ Z*_N, output the message
+m:= [c^d mod N]
+
+Say GenRSA outputs (N, e, d) = (391, 3, 235). (Note that 391 = 17 * 23 and so ϕ = 16 * 22 = 352. Moreover, 3 * 235 = 1 mod 352) So the public key is ⟨391, 3⟩ and the private key is ⟨391, 235⟩.
+
+To ecnrypt the message m = 158 ∈ Z*_391 using the public key (391, 3), we simply compute c:= [158^3 mod 391] = 295; this is the ciphertext, To decrypt, the receiver computes [295^235 mod 391] = 158.
+
+
 # Experiments:
 
 ## Perfect (adverarial) indistinguishability experiment  ![alt text](image-2.png)
@@ -447,6 +703,81 @@ Any private-key encryption scheme that is CPA-secure is also CPA-secure for mult
     ii. m !∈ Q In that case the output of the experiment is defined to be 1.
 
 A message authentication code П = (KGen, Mac, Vrfy) is existentially unforgeable under an adaptive chosen-message attack, or just secure, if for all probabilistic polynomial-time adversaries A there is a negligible function negl such that
+
+![alt text](image-39.png)
+
+One might object that the definition is too strong:
+
+1. the adversary can ask for tags for any messag eof its choice
+2. the adversary succeeds if it find a tag for any previously inauthenticated message.
+
+## The CCA indistinguishability experiment ![alt text](image-44.png):
+
+1. A key k is generated by running KGen(1^n).
+2. The adversary A is given input 1^n and oracle access to Enc_k(·) and dec_k(·). It outputs a pair of equal-length messages m0, m1.
+3.  A uniform bit b ∈ {0, 1} is chosenm and then a challenge ciphertext c <- Enc_k(m_b) is computed and given to A.
+4. The adversary A continues to have oracle access to Enc_k(·) and Dec_k(·), but is not allowed to query the latter on the challenge ciphertext itself. Eventually, A outputs a bit b'
+5. The output of the experiment is defined to be 1 b' = b, and 0 otherwise. If the output of the experiment is 1, we say that A succeeds.
+
+A private-key encryption scheme П = (Kgen, Enc, Dec) has indisnguishable encryptions under a chosen-ciphertext attack, or is CCA-secure, if for all probabilistic polynomial-time adversaries A there is a negligible function negl such that
+
+Adversary A in the CCA experiment:
+
+1. choose m0 = 0 ^ n and m1 = 1 ^ n
+2. receive c = ⟨r,s⟩
+3.  flip the first bit of s and ask for a decruption of the resulting ciphertext c' -> (this query is allowed as c' !=c )
+4. The response is either 10 ^ (n-1) (if m0 was encrypted) or 01 ^ (n - 1) (if m1 was encrypted)
+
+CCA-security is a very strong requirement -> Any encryption scheme where ciphertext can be "manipulated" in a contolled way cannot be CCA-secure
+
+![alt text](image-45.png)
+
+where the probability is taken over the randomness used by A, as well as the randomness used in the experiment
+
+
+## The unforgable ecryption experiment ![alt text](image-46.png):
+
+1. A key k is generated by running KGen(1^n)
+2. The adversary A is given input 1 ^ n and access to an encryption oracle Enc_k(·). The adversary eventually outputs a ciphertext c. Let m:= Dec_k(c) and let Q denote the set for all queries that A submitted to its oracle.
+3. A succeeds if and only if (1) m != ⊥ and (2) m !∈ Q. In that case the output of the experimatn is defined to be 1.
+
+A private-key encryption scheme П is unforgeable if for all probabilistic polynomial-time adversaries A there is a negligible function negl such that
+
+![alt text](image-47.png)
+
+## The collision-finding experiment Hash-coll A,H(n):
+
+1. A key s is generated by running KGen(1^n)
+2. The adversary A is given s, and outputs x, x'. (If H is a fixed-length hash function for inputs of length l'(n), then we require x,x' ∈ {0, 1}^(ℓ′(n)))
+3. The output of the experiment is defined to be 1 if and only if x != x' and H^s(x) = H^s(x'). In such a case we say that A has found a collision
+
+A hash function H = (KGen, H) is collision resistant if for all probabilistic polynomial-time adversaries A there is a negligible function negl such that
+![alt text](image-50.png)
+
+
+## The key-exchange experiment ![alt text](image-56.png):
+
+1. Two parties holding 1^n execute protocol П. This results in a transcript trans containing the messages sent by the parties, and a key k output by each of the parties
+2. A uniform bit b ∈ {0,1} is chosen. If b = 0, set k^:= k, and if b = 1 then choose uniform k^ ∈ {0,1}^n.
+3. A is given trans and k^, and outputs a bit b'/
+4. The output of the experiment is defined to be 1 if b' = b, and 0 otherwise. (in case ![alt text](image-57.png) = 1, we say that A succeeds)
+
+A key-exchange protocol is secure in the presence of an eavesdropper if for all probabilistic polynomial-time adversaries A there is a negligible finction negl such that
+
+![alt text](image-58.png)
+
+## Diffie-Hellman key-exchanging protocol
+
+![alt text](image-59.png)
+
+## Uniform group elements vs. uniform bit-strings
+
+- Alice and Bob can apply a key-derivation function to their shared secret g^(xy) to obtain a bit-string that is indistinguishable from random to be used as a key for subsequent cryptographic application
+
+## Active adversaries
+
+- We stress that the Diffie-Hellman protocol in the presented variant is only secure against eavsdropping adversaries
+- It is completely insecure against man-in-the-middle attack
 # Private-key Encryption
 
 ## Historic Ciphers  
@@ -625,3 +956,119 @@ For deterministic MACs (meaning Mac is deterministic), canonical verification wo
 
 1. computes t' := Mac_k(m)
 2. Outputs 1 if t' = t
+
+# Public-Key Encriptions
+## RSA-FDH
+![alt text](image-60.png)
+Let GenRSA be as before, and construct a siganture scheme as follows:
+
+- KGen: on input 1^n run GenRSA(1^n) to obtain (N, e, d). The public key is ⟨N, e⟩ and the private key is ⟨N, d⟩. As part of key generation, a function H: {0, 1}* -> Z*_N is specified, but we leave this implicit.
+- Sign: on input a private key sk = ⟨N, d⟩ and a message m ∈ Z*_N, compute ![alt text](image-61.png)
+- Vrfy: on input a public key pk = ⟨N, e⟩, a message m ∈ Z* _N, and a singature σ ∈ Z*_N, output 1 if and only if ![alt text](image-62.png)
+
+What properties does H has to specify for RSA-FDH to be secure?
+
+- H has to be hard to invert -> absence of this enables the first attack discussed above
+- H must not admit "multiplicative relations", meaning it should be hard to find m, m1, m2 with H(m) = H(m1) * H(m2) mod N -> absence of this enables the second attack discussed above
+- H must be collision resistant -> absence of this allows for forgery attacks as colliding messages have the same signatures
+
+# Attacks
+
+## MAC  
+
+### Replay attack
+
+The above definition does not protect against replay attacks, where an adversry sends again ("replays") previosuly authenticated messages
+
+This does not mean that replay attacks are not a security concern
+
+- Assume that Alice issues a transaction sending 1.000$ to Bob
+- Bob cannot modify the amount to 10.000$(this is a new message and would require breaking the MAC according to the above definition)
+- Bob can, however, just repeat the messag ea total of ten times. From point of view of the bank, it looks like Alice wants to transfer 1.000$ to Bob ten times
+
+Crucial observation: since verification is stateless, every valid pair (m,t) will always result in Vrfy_k(m, t) outputting 1
+
+Security against replay attacks has to be hadled on the application leve -> one commons method is to use timestamps
+
+### Block re-ordering attack
+
+If ⟨t1,t2⟩ is a valid tag for message m1, m2(with m1 != m2), then ⟨t2,t1⟩ is a valid tag for message m2,m1
+
+### Truncation attack
+
+Adversary can simply drop blocks from the end of the message and tag
+
+### "mix-and-match" attack
+
+Tags ⟨t1, . . . ,td ⟩ and ⟨t'1, . . . ,t'd ⟩ for message m1,...,md and m'1, ..., m'd, respectively -> ⟨t1, t'2, t3, t'4⟩ is a valid tag for message m1, m2', m3, m4', ...
+
+## CCA 
+
+### Padding-Oracle Attacks
+
+Scenario:
+
+- Client sends messages encrypted using CBC-mode to a server
+- Adversary can impersonate client and send ciphertexts to the server
+- Adversary can tell if decrypted messages are valid or not 
+
+### Encrypt-and-authenticate
+
+Secure? No. Reason: Tag t might reveal the entire message
+
+### Authenticate-then-encrypt
+
+Secure? No. Reason: Padding Oracle Attack. Assume that there are different error messages for padding errors and authentication errors: Dec'_(k_E, k_M)(c):
+
+1. Compute m~:= Dec_k_E(c). If an error in the padding is detected, return "bad padding" amd abort
+2. Parse m~ as M || t. IF Vrfy_k_M (m,t) = 1, return m; else, return "authentication failure".
+
+### Encrypt-then-authenticate
+
+Secure? Yes
+
+What happens when we do not use independent keys?
+
+Consider encrypt-then-authenticate from above but using the same k for encryption and authentication, i.e. k = k_E = k_M
+
+Let F be a strong pseudorandom permutation, which inplies that F^(-1) is a strong pseudorandom permutation as well
+
+Define Enc_k(m) = F_k(m || r) for m ∈ {0, 1} ^ n/2 and a uniform r ∈ {0, 1} ^ n/2 -> (this can be shown to be a CPA-secure)
+
+Define Mac_k(c) = F^ (-1)(c);
+
+However, using these two primitives with the same key following the encrypt-then-authenticate methodology, encryption of a message m yields
+
+![alt text](image-49.png)
+
+-> The ciphertext reveals the message in the clear!
+
+The previous example shows that using independent keys is important
+
+Basic principle of cryptography:
+
+Different instances of cryptographic primitives should always use independent keys
+
+## HMAC
+
+### The birthday problem
+
+O(2^(l/2)) better than brutte-force
+
+## RSA Signatures
+
+No-Message-Attack:
+
+1. choose σ ∈ Z*_N
+2. compute m := [σ^e mod N]
+3. output (m, σ)
+
+Verification: obvious
+
+Forgery for arbitary message m:
+
+1. Choose m1, m2 ∈ Z*_N distinct from m such that m = m1*m2 mod N
+2. get signatures σ1 and σ2 for m1 and m2, respectively (-> two queries to oracle Sign)
+3. output σ:= [σ1, σ2 mod N] as a signature of m
+
+To avoid this attack (and the no-message attack from before), we can apply some transformation to the message before singing them -> this yields RSA full-domain hash (RSA-FDH)
