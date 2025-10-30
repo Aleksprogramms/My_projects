@@ -185,4 +185,89 @@ Software is the material of the (post-)industrial information and knowledge soci
             - program in which 1% of statements are faulty
         
 
-### Consequences?
+### Consequences
+
+- attempt to base the software production on an engineering approach, with well-defined inputs, we defined methods, and well-defined results
+- design software engineering as a process that supports
+    - correctness and dependability of the software product
+    - cost-effectiveness of the production of software
+    - the complexity of the software artefact
+    - the longevity of the software production life cycle, in particular changes in requirements and enviroment
+    - communication amongst the stakeholders
+- definition of software engineering process models
+
+### Importance of Communication in SW development projects
+
+- involved parties, called stakeholders, in software development projects
+    - customers
+    - end users
+    - software desingers
+    - software development contractors
+    - software test personnel (quality assurance)
+    - auditors of certifying agencies (for safety critical software)
+    - project managers
+    - domain experts
+    - marketing experts
+    - ...
+
+- consequence: enabling and facilitaning communication about the software artifact is a cenrtal goal of software engineering
+
+## Software Engineering Processes
+
+### First Software Engineering Measure
+- Intorduction the concept of a software engineering process
+    - definition of a process model encompassing necessary activities
+    - covering all phrases of the life cycle, from inception of the idea to retirement to product
+    - goal: rigorous application to all development projects 
+    - definition of activities with well-defined inputs and outputs
+
+### Build-and-Fix
+
+![alt text](image-1.png)
+
+- No process Steps
+    - no requirements specification, dasign document, testing, etc.
+    - no documentation for later testing and maintenance
+
+- No separation of Concerns
+    - teamwork impossible
+    - everything implemented in one big chunk
+
+- Unable to Deal with Complexity
+    - may work for very small programs
+    - not for any project of reasonable size
+
+### Software Life-Cycle ACtivities
+
+I. Software Requirements
+- What is the software supposed to do?
+- elication and negotiation
+- modeling and analysis
+- specification / documentation
+- project planning
+
+II. Software Design
+- How is the software to achieve this goals
+- Architectual / class design
+- low-level / object design
+- modelling documentation
+
+III. implementation and integration
+- coding
+- unit testing
+- component / system integration 
+
+IV. Quality Assurance
+- reviews
+- verification / validation
+- customer acceptance testing 
+
+V. Operation and Maintenance 
+
+- deployment / operation
+- maintenance
+- retirement
+
+### Process Models
+
+- Classical Process m
