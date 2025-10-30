@@ -270,4 +270,122 @@ V. Operation and Maintenance
 
 ### Process Models
 
-- Classical Process m
+- Classical Process Models
+    - Waterfall / Modified Waterfall
+- Iterative and Incremental Models
+    - Spiral Model
+    - Rational Unified Process
+- Waterfall Stages + Verification Stages
+    - V-model, V-model XT
+- Agile Software Development
+    - ideas
+        - "individual and interactions over processes and tools"
+        - "working software over comprehensive documentation"
+    - examples
+        - Extreme programming
+        - SCRUM
+
+### Example Process Model: V-Model
+
+- Principal ideas
+    - first proposed by German Ministry of Defense
+    - adapted by German goverment for public software products
+    - evolved into V-Model XT
+    - today: standart process in safety-critical embedded systems projects
+    - required by standarts, e.g., ISO 26262 "Road vehicles - Functional safety"
+
+![alt text](image-2.png)
+
+### Benefits from Process Model
+
+- Specification and Documentation
+    - enables / facilitaes documentation
+    - facilities testing
+        - testing against requirements specification
+- Allows Introduction of Further Concepts
+    - verification  / validation
+        - compare intermediate stages with specified requirements and design
+    - prototyping
+        - reduce risk, since a "mock-up" of the system is available much earlier than the final product
+    - evolutionary process models
+        - accomodate change (in requirements)
+    
+### Another Consequence of the Software Affliction
+
+- software-abstraction
+
+-  yes, there are software artifacts other than code!
+    - e.g., model based software and systems engineering
+
+## Software Qualities
+
+### Correctness 
+
+- the software behaves according to the requirements specification
+    - e.g., "If a car crash happens, the airbag is eventually deployed."
+        - Lenear temporal logic formula: (crash => ♢deploy)
+
+### Reliability
+
+- the software guarantees a level of quality of service (weaker condition than correctness)
+    - the probability of satisfying requirement over time
+    - e.g., "The component shall not fail more than an average of 3 times per year."
+
+### Robustness
+
+- the software behaves "reasonably" even in unexpected circumstances, e.g., unexpected inputs from the invornment, recovery from power failures
+    - e.g., "The program shall not terminate in case of invalid API-requests"
+
+### Maintainability
+
+- software is easy to maintain, in particular perfective maintenance and extensibility
+
+### Performance  
+
+- the software guarantees a quality of service level which makes the system useable
+    - e.g. "0.1 second is about hte limit for having the userr feel that the system is reacting instantaenously."
+
+
+### Reusability
+
+- avoid re-inverting the wheel: save development costs, and rely on previously used, tested and verified code.
+
+### Interoperability
+
+- ensure that system components can work together
+- e.g., by standardization of interfaces and protocols
+
+## Software Engineering Principles
+
+### Rigor
+
+- use a method and apply it rigorously to every step of the chosen engineering process
+
+### Formality
+
+- if possible, use mathematically formalizeable methods and notations
+    - recall: (𝑐𝑟𝑎𝑠ℎ ⇒ ♢𝑑𝑒𝑝𝑙𝑜𝑦)
+- keep in mind:
+    - software engineering is a creative activity which relies heavily on the software engineer's intuition
+    - this contradicts neither rigor nor formality!
+
+### Separation of Concerns
+
+- deal with different aspects of a problem at different stages of the process
+    - enchances concentration on individual problems
+    - makes teamwork possible
+    - helps in dealing with large system's complexity
+
+### Abstaction
+
+- separate the concern of the important aspects from the concern of unimport ones
+
+### Modularity
+
+- decompose a problem into independent modules, 
+    - so that one separates the concern of module-internal questions from the concern of a module's interaction with the environment 
+
+### Generality
+    - focus on the discovery of (and the solution to) a more general problem
+
+    
