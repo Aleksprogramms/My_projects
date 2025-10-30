@@ -104,12 +104,10 @@
   <div id="toast" class="toast" role="status" aria-live="polite">Danke!</div>
 
   <script>
-    // 1) На отправку формы ставим флажок, чтобы после редиректа показать уведомление
     document.getElementById('entry-form').addEventListener('submit', function(){
       try { sessionStorage.setItem('justAdded', '1'); } catch(e){}
     });
 
-    // 2) Функция показа тоста
     function showToast(message, timeout=2200){
       const el = document.getElementById('toast');
       el.textContent = message || 'Danke!';
@@ -117,7 +115,6 @@
       setTimeout(()=> el.classList.remove('show'), timeout);
     }
 
-    // 3) Пытаемся показать нативное уведомление (если разрешено), плюс тост
     function notify(message){
       showToast(message);
       if ('Notification' in window){
@@ -127,7 +124,7 @@
       }
     }
 
-    // 4) Просим разрешение на нативные уведомления один раз
+
     (function askPermissionOnce(){
       if ('Notification' in window){
         if (Notification.permission === 'default'){
@@ -137,7 +134,7 @@
       }
     })();
 
-    // 5) После загрузки страницы проверяем флажок и показываем уведомление
+
     window.addEventListener('DOMContentLoaded', function(){
       let added = null;
       try { added = sessionStorage.getItem('justAdded'); } catch(e){}
