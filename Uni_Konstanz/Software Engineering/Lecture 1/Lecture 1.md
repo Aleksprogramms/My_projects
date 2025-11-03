@@ -287,6 +287,9 @@ V. Operation and Maintenance
 
 ### Example Process Model: V-Model
 
+<img width="233" height="144" alt="image" src="https://github.com/user-attachments/assets/ee23c61a-0da1-4537-8416-818d02b16154" />
+
+
 - Principal ideas
     - first proposed by German Ministry of Defense
     - adapted by German goverment for public software products
