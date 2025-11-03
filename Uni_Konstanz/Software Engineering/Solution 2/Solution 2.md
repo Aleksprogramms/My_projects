@@ -16,8 +16,8 @@ d) Generality:
 
 a) V-model helps to work on different stages of working by returning to the basic stages
 b) On different layers we can add or dismiss ideas, that are not important/useless
-c) -  
-d) - 
+c) Create firstly Requirements, than system, than design and so on 
+d) Using V-model we can stay on making the same idea, and not be disturbed by other
 
 ## Tutorial Question 2.2 Software Qualities
 
