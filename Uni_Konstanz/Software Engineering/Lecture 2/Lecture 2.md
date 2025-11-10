@@ -166,3 +166,174 @@
     - after every command the operating system is supposed to return control to the user
     - the software is never supposed to enter an infinite loop
     - the user interface is required to be easy to operate
+
+### Consistency
+
+- no two requirements are longically a contradiction (a and not a)
+- possible inconsistencies
+    - contradictory behavior
+        - when the receiver is being picked up, a dial tone will be heard
+        - when the receiver is being picked up, a ring tone will be heard
+    - contradictory expressions
+    - contradictory properties
+    - temporal inconsistencies
+        - entering a leads to an output b at the same time
+        - b may never be observed less than 15 seconds after observing a
+
+### Traceable
+
+- the requirements specification is edited in such way that it is easy to reference every single requirement
+    - often, achieved through numbering scheme (R1, R2, ...)
+    - important when relating design or code to requirements
+        - essential is testing
+
+## Requirements Engineering Framework (Pohl)
+
+![alt text](image-3.png)
+
+### Requirements Engineering Framework (Pohl) - System context
+
+- Subject facet
+    - objects and events relevant for the system
+    - for example, elements the system must store or process information about
+- Usage facet
+    - aspects concerning the usage by people or other systems
+- IT system facet
+    - objects and elements of the IT system enviroment of the system
+    - for example existing hardware and software components to be used
+- Development facet
+    - aspects concerning the development process of the system
+    - for example process guidelines, development tools
+
+- Useful also for identifying relevant stakeholders and associated requirements!
+
+- Activities
+    - requirements eliciation
+        - interviews, scenarios, market observation, etc.
+    - requirements analysis and negotiation
+        - determination, which of the possibly contradiction requirements are important
+    - requirements documentation and specification
+        - generally comprehesible requirements document
+        - non-formal or formal specification
+    - requirements validation
+        - consistency
+        - completness
+        - correspondence of documented requiremtns and abstract customer or user requirements
+    
+## Requirements Elication
+
+- to elicit
+    - German: hervorrufen, entlocken, herauslocken, hervorlocken
+- Elication
+    - "the process of getting or producing something, especially information or a reaction"
+    - German: Erhebung, Herausholung
+
+- Requirements Elicitation (German: Anforderingsermittlung)
+    - identification of relevant requirement sources
+        - keep in mind the four facets: usage, subject, IT, development
+        - take into consideration different stakeholders
+        - check already defined documents, analyse existing systems
+    - elicitation of existing requirements
+    - development of new and innovative requirements
+
+- Participation 
+    - usually quite divers
+        - software engineers (usually leading requirements elicitation)
+        - users
+        - marketing experts, ...
+    - no single person knows everything about system
+
+- Social Activity
+    - as much as a technical one
+    - imprecise and difficult process in which human communication problems need to be addressed
+        - technical language barrier
+            - ambiguiities
+                - e.g. "implementation"
+            - technical/ non-technical vocabulary
+        - users / customers not aware of their needs
+        - users / customers apprehensive of expressing thier needs
+            - request reveals incompetency?
+        - users may fear to express needs
+            0 jeopardizing own or other's jobs
+        - personalities and group dynamics
+
+### Interviewing
+
+- Three types of Interviews
+    - standardised interview: interviewer has prepared questions and will not deviate from them
+    - exploratory intervies: interviewer has prepared question but may deviate from them
+    - unstructured interview: no prepared question catalogue
+
+- Participants 
+    - individual or group interviews are possible
+
+- Activities 
+    - preparation, execution and follow-up activities are, in principle the same for all types of interview
+
+- Structured Questioning Techniques
+    - usually lead by software engineer
+    - context-of-system questions
+        - why are we building this system?
+        - who are the other users?
+        - determine critical functionality / needs
+    - open-ended questions
+        - elicit large amount of information
+        - useful when not much is known yet to ask specific questions
+        - examples
+            - "describe X"
+            - "tell me what to do"
+    - closed-ended questions
+        - when enough about the system is knwon, ask specific questions
+        - example
+            - "how often should sales reports be generated?"
+
+    - try to proceed from open-ended to closed-ended queations
+
+    - rephrase answers
+        - make sure you understood the client's answer
+    - check for errors, inconsistencies and ambiguities
+    - find out who else to interview
+        - who else uses the system
+        - who interacts with you
+        - who will agree/disagree with you
+
+### Interviewing - Activities
+
+- Preparation
+    - define the goal of the intervies
+    - select and invite participants 
+    - choose the interview location
+    - work out a list of questions
+    - make yourself familiar with the participants
+    - know the participandts terminology
+    - agreement between multiple interviewers
+
+- Execution
+    - opening 
+        - explain the goal of the interview, introducing question
+    - main phase
+        - provide feedback and ask questions
+        - create simple models, use scenarios
+        - pay attention to non-verbal communication
+        - take breaks
+        - focus on the subject
+        - document the results
+    - finalisation
+        - summarize main results
+        - provide posistive feedback and
+        - thank the paricipants
+
+- Follow up (optional)
+    - analyse the results of the interview
+    - ask the interviewees to confirm the results
+
+- Benefit from Requirements Elicitation
+
+    - standardized interviews help identifying relevant requirement sources
+    - elicitation of existing requirements in a conversation
+    - developing new and innovative requirements with open interviews
+
+- Relative Effort
+    - medium to high
+
+## 51
